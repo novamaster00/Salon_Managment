@@ -41,8 +41,8 @@ export default function Footer() {
             <h3 className="text-xl font-bold mb-4">Hours</h3>
             <ul className="text-gray-300 space-y-2">
               <li>Monday - Friday: <br /><span className="text-barbershop-gold">9AM - 8PM</span></li>
-              <li>Saturday: <br /><span className="text-barbershop-gold">10AM - 6PM</span></li>
-              <li>Sunday: <br /><span className="text-barbershop-gold">11AM - 4PM</span></li>
+              <li>Saturday: <br /><span className="text-barbershop-gold">09AM - 11PM</span></li>
+              <li>Sunday: <br /><span className="text-barbershop-gold">09AM - 12AM</span></li>
             </ul>
           </div>
           
