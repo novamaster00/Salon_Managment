@@ -29,52 +29,52 @@ const SERVICES = [
   {
     id: 'haircut',
     name: 'Haircut',
-    image: '/images/HairCut.png',
+    image: 'https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?auto=format&fit=crop&w=400&q=80',
   },
   {
     id: 'haircut-and-beard-trim',
     name: 'Haircut & Beard Trim',
-    image: '/images/Shave.png',
+    image: 'https://images.unsplash.com/photo-1582562124811-c09040d0a901?auto=format&fit=crop&w=400&q=80',
   },
   {
     id: 'beard-trim',
     name: 'Beard Trim',
-    image: '/images/Beard_Trim.png',
+    image: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80',
   },
   {
     id: 'haircut-and-styling',
     name: 'Haircut & Styling',
-    image: '/images/Hair_styling.png',
+    image: 'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80',
   },
   {
     id: 'coloring',
     name: 'Coloring',
-    image: '/images/coloring_hair.png',
+    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
   },
   {
     id: 'styling',
     name: 'Styling',
-    image: '/images/Styling.png',
+    image: 'https://images.unsplash.com/photo-1510915228340-29c85a43dcfe?auto=format&fit=crop&w=400&q=80',
   },
   {
     id: 'kids-haircut',
     name: 'Kids Haircut',
-    image: '/images/kid_hair_cut.png',
+    image: 'https://images.unsplash.com/photo-1465101162946-4377e57745c3?auto=format&fit=crop&w=400&q=80',
   },
   {
     id: 'shave',
     name: 'Shave',
-    image: '/images/Shave.png',
+    image: 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80',
   },
   {
     id: 'facial',
     name: 'Facial',
-    image: '/images/Facial.png',
+    image: 'https://images.unsplash.com/photo-1465101178521-c1a9136a1b14?auto=format&fit=crop&w=400&q=80',
   },
   {
     id: 'full-service',
     name: 'Full Service',
-    image: '/images/Hair_styling.png',
+    image: 'https://images.unsplash.com/photo-1542068829-8a8c7f9a7100?auto=format&fit=crop&w=400&q=80',
   },
 ];
 
