@@ -37,6 +37,7 @@ const app = express();
 app.use(cors(corsConfig))
 
 app.options('*', cors(corsConfig)); // handles preflight
+
 app.use((req, res, next) => {
   console.log('CORS response headers:');
   console.log('Access-Control-Allow-Origin:', res.getHeader('Access-Control-Allow-Origin'));
