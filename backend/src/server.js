@@ -1,4 +1,4 @@
-require('dotenv').config({ path: __dirname + '/.env' });
+require('dotenv').config();
 
 // require('dotenv').config()
 const express = require('express');
@@ -14,6 +14,7 @@ const { scheduleAutoRejection } = require('./services/autoRejectionService');
 
 // Connect to database
 connectDB();
+
 
 // Schedule auto-rejection job
 const autoRejectionJob = scheduleAutoRejection();
