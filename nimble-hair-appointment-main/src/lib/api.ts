@@ -15,7 +15,7 @@ import {
   WorkingHoursInput
 } from './types';
 
-const API_URL = 'http://localhost:3000/api'; // Replace with actual API URL
+const API_URL = import.meta.env.VITE_BACKEND_URL; // Replace with actual API URL
 
 // Helper function to handle API responses
 export async function handleResponse<T>(response: Response): Promise<T> {
