@@ -29,37 +29,37 @@ const SERVICES = [
   {
     id: 'haircut',
     name: 'Haircut',
-    image: '/images/Haircut.jpg',
+    image: '/Images/Haircut.jpg',
   },
   {
     id: 'haircut-and-beard-trim',
     name: 'Haircut & Beard Trim',
-    image: '/images/Beard_and_hair.jpg',
+    image: '/Images/Beard_and_hair.jpg',
   },
   {
     id: 'beard-trim',
     name: 'Beard Trim',
-    image: '/images/Beard_Trim.jpg',
+    image: '/Images/Beard_Trim.jpg',
   },
   {
     id: 'haircut-and-styling',
     name: 'Haircut & Styling',
-    image: '/images/haircut_Beard_Trim.jpg',
+    image: '/Images/haircut_Beard_Trim.jpg',
   },
   {
     id: 'coloring',
     name: 'Coloring',
-    image: '/images/coloring.jpg',
+    image: '/Images/coloring.jpg',
   },
   {
     id: 'styling',
     name: 'Styling',
-    image: '/images/HairStyling.jpg',
+    image: '/Images/HairStyling.jpg',
   },
   {
     id: 'kids-haircut',
     name: 'Kids Haircut',
-    image: '/images/kids_hair_cut.jpg',
+    image: '/Images/kids_hair_cut.jpg',
   },
   {
     id: 'shave',
@@ -69,12 +69,12 @@ const SERVICES = [
   {
     id: 'facial',
     name: 'Facial',
-    image: '/images/facial.jpg',
+    image: '/Images/facial.jpg',
   },
   {
     id: 'full-service',
     name: 'Full Service',
-    image: '/images/full_service.jpg',
+    image: '/Images/full_service.jpg',
   },
 ];
 
