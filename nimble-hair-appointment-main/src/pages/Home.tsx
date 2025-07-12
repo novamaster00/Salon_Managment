@@ -29,52 +29,52 @@ const SERVICES = [
   {
     id: 'haircut',
     name: 'Haircut',
-    image: 'https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?auto=format&fit=crop&w=400&q=80',
+    image: '/images/Haircut.jpg',
   },
   {
     id: 'haircut-and-beard-trim',
     name: 'Haircut & Beard Trim',
-    image: 'https://images.unsplash.com/photo-1582562124811-c09040d0a901?auto=format&fit=crop&w=400&q=80',
+    image: '/images/Beard_and_hair.jpg',
   },
   {
     id: 'beard-trim',
     name: 'Beard Trim',
-    image: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80',
+    image: '/images/Beard_Trim.jpg',
   },
   {
     id: 'haircut-and-styling',
     name: 'Haircut & Styling',
-    image: 'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80',
+    image: '/images/haircut_Beard_Trim.jpg',
   },
   {
     id: 'coloring',
     name: 'Coloring',
-    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
+    image: '/images/coloring.jpg',
   },
   {
     id: 'styling',
     name: 'Styling',
-    image: 'https://images.unsplash.com/photo-1510915228340-29c85a43dcfe?auto=format&fit=crop&w=400&q=80',
+    image: '/images/HairStyling.jpg',
   },
   {
     id: 'kids-haircut',
     name: 'Kids Haircut',
-    image: 'https://images.unsplash.com/photo-1465101162946-4377e57745c3?auto=format&fit=crop&w=400&q=80',
+    image: '/images/kids_hair_cut.jpg',
   },
   {
     id: 'shave',
     name: 'Shave',
-    image: 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80',
+    image: '/images/Shave.jpg',
   },
   {
     id: 'facial',
     name: 'Facial',
-    image: 'https://images.unsplash.com/photo-1465101178521-c1a9136a1b14?auto=format&fit=crop&w=400&q=80',
+    image: '/images/facial.jpg',
   },
   {
     id: 'full-service',
     name: 'Full Service',
-    image: 'https://images.unsplash.com/photo-1542068829-8a8c7f9a7100?auto=format&fit=crop&w=400&q=80',
+    image: '/images/full_service.jpg',
   },
 ];
 
