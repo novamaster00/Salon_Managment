@@ -10,11 +10,11 @@ const STATUS = require('../constants/status');
 // @route   GET /api/dashboard
 // @access  Private (Barber/Admin)
 exports.getDashboardData = asyncHandler(async (req, res, next) => {
-  const { barberId,date} = req.body;
+  const { barberId, date } = req.body;
 
+  console.log('=== DASHBOARD DEBUG START ===');
+  console.log('Request body:', req.body);
   console.log('Decoded User from JWT:', req.user);
-
-  // Inside any route handler or middleware
   console.log('Authorization Header:', req.headers.authorization);
 
   // Use logged-in barber's ID if not specified and user is a barber
@@ -25,6 +25,9 @@ exports.getDashboardData = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse('Please provide a barber ID', 400));
   }
   
+  console.log('Target Barber ID:', targetBarberId);
+  console.log('Target Barber ID Type:', typeof targetBarberId);
+  
   // If barber is trying to access another barber's dashboard
   if (req.user.role === 'barber' && req.user.id !== targetBarberId) {
     return next(new ErrorResponse('Not authorized to access this dashboard', 403));
@@ -32,12 +35,72 @@ exports.getDashboardData = asyncHandler(async (req, res, next) => {
   
   // Default to today if no date specified
   const targetDate = date || new Date().toISOString().split('T')[0];
+  console.log('Target Date:', targetDate);
+  console.log('Target Date Type:', typeof targetDate);
+  
+  // DEBUG: Check what's in the database
+  console.log('=== DATABASE CONTENT CHECK ===');
+  
+  // Check all appointments for this barber (regardless of date/status)
+  const allBarberAppointments = await Appointment.find({ barberId: targetBarberId });
+  console.log(`Total appointments for barber ${targetBarberId}:`, allBarberAppointments.length);
+  console.log('Sample appointment:', allBarberAppointments[0]);
+  
+  // Check all walk-ins for this barber
+  const allBarberWalkIns = await WalkIn.find({ barberId: targetBarberId });
+  console.log(`Total walk-ins for barber ${targetBarberId}:`, allBarberWalkIns.length);
+  console.log('Sample walk-in:', allBarberWalkIns[0]);
+  
+  // Check what dates exist in appointments
+  const appointmentDates = await Appointment.distinct('date', { barberId: targetBarberId });
+  console.log('Available appointment dates:', appointmentDates);
+  
+  // Check what dates exist in walk-ins
+  const walkInDates = await WalkIn.distinct('date', { barberId: targetBarberId });
+  console.log('Available walk-in dates:', walkInDates);
+  
+  // Check pending appointments with different query variations
+  console.log('=== PENDING APPOINTMENTS DEBUG ===');
+  
+  // Check what STATUS values are available
+  console.log('STATUS constants:', STATUS);
+  
+  // Check all appointments regardless of status
+  const allAppointments = await Appointment.find({ barberId: targetBarberId });
+  console.log('All appointments for barber:', allAppointments.map(apt => ({
+    id: apt._id,
+    status: apt.status,
+    date: apt.date,
+    dateType: typeof apt.date
+  })));
+  
+  // Check all waiting queue entries
+  const allWaitingQueue = await WaitingQueue.find({ barberId: targetBarberId });
+  console.log('All waiting queue entries:', allWaitingQueue.map(wq => ({
+    id: wq._id,
+    status: wq.status,
+    date: wq.date,
+    dateType: typeof wq.date,
+    position: wq.position
+  })));
+  
+  // Check all walk-ins
+  const allWalkIns = await WalkIn.find({ barberId: targetBarberId });
+  console.log('All walk-ins:', allWalkIns.map(wi => ({
+    id: wi._id,
+    status: wi.status,
+    date: wi.date,
+    dateType: typeof wi.date
+  })));
+
+  console.log('=== ORIGINAL QUERIES DEBUG ===');
   
   // Get working hours
   const workingHours = await WorkingHours.findOne({
     barberId: targetBarberId,
     date: targetDate
   }); 
+  console.log('Working hours found:', !!workingHours);
   
   // Get pending appointments
   const pendingAppointments = await Appointment.find({
@@ -47,6 +110,7 @@ exports.getDashboardData = asyncHandler(async (req, res, next) => {
     path: 'customerId',
     select: 'name email phoneNumber'
   }).sort('date requestedTime');
+  console.log('Pending appointments query result:', pendingAppointments.length);
   
   // Get approved appointments for the day
   const approvedAppointments = await Appointment.find({
@@ -57,12 +121,23 @@ exports.getDashboardData = asyncHandler(async (req, res, next) => {
     path: 'customerId',
     select: 'name email phoneNumber'
   }).sort('startTime');
+  console.log('Approved appointments query result:', approvedAppointments.length);
+  console.log('Approved appointments query conditions:', {
+    barberId: targetBarberId,
+    date: targetDate,
+    status: STATUS.APPROVED
+  });
   
   // Get walk-ins for the day
   const walkIns = await WalkIn.find({
     barberId: targetBarberId,
     date: targetDate
   }).sort('arrivalTime');
+  console.log('Walk-ins query result:', walkIns.length);
+  console.log('Walk-ins query conditions:', {
+    barberId: targetBarberId,
+    date: targetDate
+  });
   
   // Get waiting queue
   const waitingQueue = await WaitingQueue.find({
@@ -70,6 +145,36 @@ exports.getDashboardData = asyncHandler(async (req, res, next) => {
     date: targetDate,
     status: STATUS.WAITING
   }).sort('position');
+  console.log('Waiting queue query result:', waitingQueue.length);
+  console.log('Waiting queue query conditions:', {
+    barberId: targetBarberId,
+    date: targetDate,
+    status: STATUS.WAITING
+  });
+  
+  // Let's also try querying without the date filter to see if date is the issue
+  const waitingQueueNoDate = await WaitingQueue.find({
+    barberId: targetBarberId,
+    status: STATUS.WAITING
+  });
+  console.log('Waiting queue WITHOUT date filter:', waitingQueueNoDate.length);
+  
+  // Check if your "waiting" entry matches the exact query
+  const exactMatch = await WaitingQueue.findOne({
+    barberId: targetBarberId,
+    date: targetDate,
+    status: STATUS.WAITING
+  });
+  console.log('Exact match for waiting queue:', !!exactMatch);
+  if (exactMatch) {
+    console.log('Exact match details:', {
+      id: exactMatch._id,
+      barberId: exactMatch.barberId,
+      date: exactMatch.date,
+      status: exactMatch.status,
+      position: exactMatch.position
+    });
+  }
   
   // Populate the queue with source details
   const populatedQueue = await Promise.all(
@@ -99,6 +204,7 @@ exports.getDashboardData = asyncHandler(async (req, res, next) => {
     date: targetDate,
     status: STATUS.ONGOING
   });
+  console.log('Current service found:', !!currentService);
   
   let currentServiceData = null;
   if (currentService) {
@@ -119,6 +225,7 @@ exports.getDashboardData = asyncHandler(async (req, res, next) => {
     date: targetDate,
     status: STATUS.COMPLETED
   }).sort('updatedAt');
+  console.log('Completed services query result:', completedServices.length);
   
   const populatedCompletedServices = await Promise.all(
     completedServices.map(async (entry) => {
@@ -150,7 +257,8 @@ exports.getDashboardData = asyncHandler(async (req, res, next) => {
     completed: populatedCompletedServices.length
   };
 
-  console.log(metrics);
+  console.log('Final metrics:', metrics);
+  console.log('=== DASHBOARD DEBUG END ===');
   
   res.status(200).json({
     success: true,
@@ -164,7 +272,8 @@ exports.getDashboardData = asyncHandler(async (req, res, next) => {
         sourceData: currentServiceData
       } : null,
       waitingQueue: populatedQueue,
-      completedServices: populatedCompletedServices
+      completedServices: populatedCompletedServices,
+      WalkIn: WalkIn 
     }
   });
 });

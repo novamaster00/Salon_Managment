@@ -6,6 +6,7 @@ const generateToken = require('../utils/generateToken');
 const STATUS = require('../constants/status');
 const { sendTokenAssignmentNotification } = require('./notificationService');
 const { addMinutesToTime } = require('../utils/dateUtils');
+const { default: mongoose } = require('mongoose');
 
 /**
  * Add an appointment to the waiting queue
@@ -14,67 +15,143 @@ const { addMinutesToTime } = require('../utils/dateUtils');
  * @param {boolean} sendNotification - Whether to send a notification
  * @returns {Promise<Object>} - The created queue entry
  */
-const addAppointmentToQueue = async (appointmentId, sendNotification = true) => {
-  const appointment = await Appointment.findById(appointmentId).populate('customerId');
-  
-  if (!appointment) {
-    throw new Error('Appointment not found');
-  }
-  
-  if (appointment.status !== STATUS.APPROVED) {
-    throw new Error('Only approved appointments can be added to the queue');
-  }
-  
-  // Check if already in queue
-  const existingEntry = await WaitingQueue.findOne({
-    sourceType: 'appointment',
-    sourceId: appointmentId
-  });
-  
-  if (existingEntry) {
-    return existingEntry;
-  }
-  
-  // Generate token if not already set
-  if (!appointment.tokenNumber) {
-    appointment.tokenNumber = generateToken('appointment', new Date(appointment.date));
+const addAppointmentToQueue = async (appointmentMOD, sendNotification = true, allowAnyStatus = false) => {
+  try {
+    console.log("\n\n\n\n\n\n\n\n\n\n====addAppointmentToQueue started====");
+    console.log("Input parameter:", appointmentMOD);
+    console.log("Allow any status:", allowAnyStatus);
+    
+    // Handle both ObjectId and populated appointment object
+    let appointment;
+    let appointmentId;
+    
+    if (typeof appointmentMOD === 'string' || appointmentMOD instanceof mongoose.Types.ObjectId) {
+      console.log("Fetching appointment by ID:", appointmentMOD);
+      appointment = await Appointment.findById(appointmentMOD).populate('customerId');
+      appointmentId = appointmentMOD;
+    } else if (appointmentMOD && appointmentMOD._id) {
+      console.log("Using provided appointment object");
+      appointment = appointmentMOD;
+      appointmentId = appointment._id;
+    } else {
+      throw new Error('Invalid appointment parameter provided');
+    }
+    
+    if (!appointment) {
+      throw new Error('Appointment not found');
+    }
+    
+    console.log("Found appointment ID:", appointmentId);
+    console.log("Current appointment status:", appointment.status);
+    console.log("Expected status (STATUS.APPROVED):", STATUS.APPROVED);
+    
+    // Only check status if not allowing any status
+    if (!allowAnyStatus && appointment.status !== STATUS.APPROVED) {
+      throw new Error(`Only approved appointments can be added to the queue. Current status: ${appointment.status}`);
+    }
+    
+    // If allowing any status, automatically approve the appointment if it's not already approved
+    if (allowAnyStatus && appointment.status !== STATUS.APPROVED) {
+      console.log("Auto-approving appointment for queue addition...");
+      appointment.status = STATUS.APPROVED;
+      await appointment.save();
+      console.log("Appointment approved");
+    }
+    
+    // Check if already in queue
+    console.log("Checking if appointment already in queue...");
+    const existingEntry = await WaitingQueue.findOne({
+      sourceType: 'appointment',
+      sourceId: appointmentId
+    });
+    
+    if (existingEntry) {
+      console.log("Appointment already in queue, updating status to WAITING");
+      
+      // Update both queue entry and appointment to WAITING status
+      existingEntry.status = STATUS.WAITING;
+      await existingEntry.save();
+      
+      appointment.status = STATUS.WAITING;
+      await appointment.save();
+      
+      return existingEntry;
+    }
+    
+    console.log("Appointment not in queue, proceeding to add...");
+    
+    // Generate token if not already set
+    if (!appointment.tokenNumber) {
+      console.log("Generating token number...");
+      appointment.tokenNumber = generateToken('appointment', new Date(appointment.date));
+      await appointment.save();
+      console.log("Token generated:", appointment.tokenNumber);
+    }
+    
+    // Get the current position in queue
+    console.log("Getting queue position...");
+    const highestPosition = await WaitingQueue.findOne({ 
+      barberId: appointment.barberId,
+      date: appointment.date
+    }).sort('-position');
+    
+    const position = highestPosition ? highestPosition.position + 1 : 1;
+    console.log("Queue position:", position);
+    
+    // Calculate estimated start time
+    let estimatedStartTime = appointment.startTime || appointment.requestedTime;
+    console.log("Estimated start time:", estimatedStartTime);
+    
+    // Create queue entry
+    console.log("Creating queue entry...");
+    const queueEntry = await WaitingQueue.create({
+      barberId: appointment.barberId,
+      date: appointment.date,
+      tokenNumber: appointment.tokenNumber,
+      sourceType: 'appointment',
+      sourceId: appointmentId,
+      estimatedTime: appointment.estimatedTime,
+      estimatedStartTime,
+      position,
+      status: STATUS.WAITING
+    });
+    console.log("Queue entry created successfully");
+
+    // Update appointment status to WAITING
+    console.log("Updating appointment status to WAITING...");
+    console.log("Before status change:", appointment.status);
+    appointment.status = STATUS.WAITING;
+    console.log("After status change (in memory):", appointment.status);
+    
+    // Save the appointment
     await appointment.save();
+    console.log("Appointment saved");
+    
+    // Verify the save worked
+    const savedAppointment = await Appointment.findById(appointmentId);
+    console.log("Appointment status after save (from DB):", savedAppointment.status);
+    
+    // Populate the source for notification
+    queueEntry.sourceId = appointment;
+    if (appointment.customerId) {
+      queueEntry.sourceId.customer = appointment.customerId;
+    }
+    
+    // Send notification
+    if (sendNotification) {
+      console.log("Sending notification...");
+      await sendTokenAssignmentNotification(queueEntry);
+      console.log("Notification sent successfully");
+    }
+    
+    console.log("====addAppointmentToQueue completed successfully====\n\n\n\n\n\n\n\n\n\n\n\n");
+    return queueEntry;
+    
+  } catch (error) {
+    console.error("Error in addAppointmentToQueue:", error.message);
+    console.error("Stack trace:", error.stack);
+    throw error; // Re-throw the error so it can be caught by the caller
   }
-  
-  // Get the current position in queue
-  const highestPosition = await WaitingQueue.findOne({ 
-    barberId: appointment.barberId,
-    date: appointment.date
-  }).sort('-position');
-  
-  const position = highestPosition ? highestPosition.position + 1 : 1;
-  
-  // Calculate estimated start time (simplified)
-  let estimatedStartTime = appointment.startTime || appointment.requestedTime;
-  
-  // Create queue entry
-  const queueEntry = await WaitingQueue.create({
-    barberId: appointment.barberId,
-    date: appointment.date,
-    tokenNumber: appointment.tokenNumber,
-    sourceType: 'appointment',
-    sourceId: appointmentId,
-    estimatedTime: appointment.estimatedTime,
-    estimatedStartTime,
-    position,
-    status: STATUS.WAITING
-  });
-  
-  // Populate the source for notification
-  queueEntry.sourceId = appointment;
-  queueEntry.sourceId.customer = appointment.customerId;
-  
-  // Send notification
-  if (sendNotification) {
-    await sendTokenAssignmentNotification(queueEntry);
-  }
-  
-  return queueEntry;
 };
 
 /**
@@ -289,6 +366,8 @@ const recalculateWaitTimes = async (barberId, date) => {
     currentTime = addMinutesToTime(currentTime, entry.estimatedTime);
   }
 };
+
+
 
 module.exports = {
   addAppointmentToQueue,

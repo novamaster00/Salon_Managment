@@ -6,7 +6,7 @@ const {
   getWalkIn,
   updateWalkInStatus
 } = require('../controllers/walkInController');
-const validateRequest = require('../middleware/validator');
+const {validateRequest} = require('../middleware/validator');
 const { protect, authorize } = require('../middleware/auth');
 const { enforceWorkingHours } = require('../middleware/timeEnforcement');
 

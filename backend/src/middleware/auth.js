@@ -25,8 +25,7 @@ exports.protect = asyncHandler(async (req, res, next) => {
 
     // Attach user to request
     req.user = await User.findById(decoded.id);
-
-    console.log(req.user);
+  
 
     // Check if user exists
     if (!req.user) {
@@ -82,3 +81,15 @@ exports.isBarberForResource = (model) => asyncHandler(async (req, res, next) => 
 
   next();
 });
+ 
+exports.debugMiddleware = (req, res, next) => {
+  console.log('🔍 Route Debug:', {
+    method: req.method,
+    url: req.url,
+    originalUrl: req.originalUrl,
+    params: req.params,
+    query: req.query,
+    body: req.method === 'POST' ? req.body : 'N/A'
+  });
+  next();
+};

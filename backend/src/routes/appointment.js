@@ -11,7 +11,7 @@ const {
   rejectAppointment,
   
 } = require('../controllers/appointmentController');
-const validateRequest = require('../middleware/validator');
+const {validateRequest} = require('../middleware/validator');
 const { protect, authorize } = require('../middleware/auth');
 const { checkTimeAvailability } = require('../middleware/timeEnforcement');
 const getAvailableSlots = require('../controllers/availableSlotsController');
@@ -28,7 +28,7 @@ router.post(
   createAppointment
 );
 
-router.post('/available-slots',validateRequest('appointment', 'create'),checkSlotAvailability );
+router.post('/available-slots',protect,authorize('customer','barber','admin'),validateRequest('appointment', 'create'),checkSlotAvailability );
 
 router.get('/', protect, getAppointments);
 router.get('/single', protect, getAppointment);
@@ -41,7 +41,7 @@ router.put(
   updateAppointmentStatus
 );
 
-router.put('/confirm', protect, confirmSuggestedAppointment);// once appointment request made user must confimr the booking.  
+router.put('/confirm', protect, confirmSuggestedAppointment);
 
 router.delete(
   '/',
