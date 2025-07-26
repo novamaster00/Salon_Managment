@@ -40,10 +40,7 @@
     "@radix-ui/react-toggle-group": "^1.1.0",
     "@radix-ui/react-tooltip": "^1.1.4",
     "@tanstack/react-query": "^5.56.2",
-<<<<<<< HEAD
-=======
     "axios": "^1.10.0",
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",
@@ -68,10 +65,7 @@
   "devDependencies": {
     "@eslint/js": "^9.9.0",
     "@tailwindcss/typography": "^0.5.15",
-<<<<<<< HEAD
-=======
     "@types/axios": "^0.9.36",
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
     "@types/node": "^22.5.5",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
