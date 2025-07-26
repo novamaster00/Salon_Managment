@@ -1,11 +1,4 @@
-<<<<<<< HEAD
-require('dotenv').config();
-
-=======
-// require('dotenv').config();
-require('dotenv').config({ path: __dirname + '/.env' });
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
-// require('dotenv').config()
+require('dotenv').config()
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -35,11 +28,8 @@ const waitingQueueRoutes = require('./routes/waitingQueue');
 const availableSlotsRoutes = require('./routes/availableSlots');
 const dashboardRoutes = require('./routes/dashboard');
 
-<<<<<<< HEAD
-=======
 
 
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
 const app = express();
 
 
@@ -49,14 +39,6 @@ app.use(cors(corsConfig))
 app.options('*', cors(corsConfig)); // handles preflight
 
 app.use((req, res, next) => {
-<<<<<<< HEAD
-  console.log('CORS response headers:');
-  console.log('Access-Control-Allow-Origin:', res.getHeader('Access-Control-Allow-Origin'));
-  console.log('Access-Control-Allow-Credentials:', res.getHeader('Access-Control-Allow-Credentials'));
-  next();
-});
-
-=======
   next();
 });
 
@@ -71,7 +53,6 @@ console.log = function (...args) {
   }
   log.apply(console, args);
 };
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
 
 // Body parser
 app.use(express.json());
@@ -82,10 +63,6 @@ app.use(helmet());
 
 
 app.use((req, res, next) => {
-<<<<<<< HEAD
-  console.log('Incoming request from:', req.headers.origin);
-=======
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
   next();
 });
 
@@ -98,15 +75,9 @@ app.use('/api/walkins', walkInRoutes);
 app.use('/api/working-hours', workingHoursRoutes);
 app.use('/api/blocked-slots', blockedSlotRoutes);
 app.use('/api/waiting-queue', waitingQueueRoutes);
-<<<<<<< HEAD
-// app.use('/api/available-slots', availableSlotsRoutes);
-app.use('/api/dashboard', dashboardRoutes);
-
-=======
 app.use('/api/dashboard', dashboardRoutes);
 
 
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
 // Root endpoint
 app.get('/', (req, res) => {
   res.send('Barbershop API is running');
