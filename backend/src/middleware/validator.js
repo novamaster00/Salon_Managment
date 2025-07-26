@@ -19,8 +19,6 @@ const customTime = Joi.string().custom((value, helpers) => {
 }, 'Time Format Validation');
 
 
-<<<<<<< HEAD
-=======
 // Service durations for validation
 const SERVICE_DURATIONS = {
   'haircut': 30,
@@ -46,7 +44,6 @@ const validateService = Joi.string()
 
 // Status enums updated according to knowledge base
 const appointmentStatusEnum = Object.values(STATUS);
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
 
 // Create validation schemas
 const schemas = {
@@ -59,13 +56,6 @@ const schemas = {
       service: Joi.string().required(),
       date: customDate.required(),
       requestedTime: customTime.required(),
-<<<<<<< HEAD
-      notes: Joi.string().allow('', null)
-    }),
-    update: Joi.object({
-      appointmentId: Joi.string().required(),
-      status: Joi.string().valid('pending_approval', 'approved', 'rejected', 'completed', 'waiting','pending','ongoing').required(),
-=======
       notes: Joi.string().allow('', null),
       customerId: Joi.string().optional(), // Added
       startTime: customTime.optional(),    // Reserved internally
@@ -75,7 +65,6 @@ const schemas = {
       _id: Joi.string().allow('', null),
       appointmentId: Joi.string().required(),
       status: Joi.string().valid(...appointmentStatusEnum).required(),
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
       notes: Joi.string().allow('', null)
     })
   },
@@ -132,13 +121,9 @@ const schemas = {
   availableSlots: {
     search: Joi.object({
       barberId: Joi.string().required(),
-<<<<<<< HEAD
-      date: customDate.required()
-=======
       date: customDate.required(),
       service: Joi.string().required(),
       requestedTime: customTime.required(),
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
     })
   },
   auth: {
@@ -182,9 +167,6 @@ const validateRequest = (schemaName, validationType) => {
   };
 };
 
-<<<<<<< HEAD
-module.exports = validateRequest;
-=======
 const passwordResetSchemas = {
   forgotPassword: Joi.object({
     email: Joi.string().email().required().messages({
@@ -237,4 +219,3 @@ module.exports = {validateRequest,
                   passwordResetSchemas,
                   validateForgotPassword,
                   validateResetPassword};
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)

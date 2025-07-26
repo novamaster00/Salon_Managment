@@ -32,6 +32,11 @@ const dashboardRoutes = require('./routes/dashboard');
 
 const app = express();
 
+console.log("🔍 Environment Check:");
+console.log("CLIENT_URL:", process.env.CLIENT_URL);
+console.log("MONGO_URI:", process.env.MONGO_URI ? "✔️ Set" : "❌ Not Set");
+console.log("EMAIL_USER:", process.env.EMAIL_USER || "NOT SET");
+
 
 // solve cors errors
 app.use(cors(corsConfig))
@@ -86,7 +91,7 @@ app.get('/', (req, res) => {
 // Error handler middleware
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT;
 
 const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

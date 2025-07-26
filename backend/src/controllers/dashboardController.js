@@ -10,74 +10,61 @@ const STATUS = require('../constants/status');
 // @route   GET /api/dashboard
 // @access  Private (Barber/Admin)
 exports.getDashboardData = asyncHandler(async (req, res, next) => {
-<<<<<<< HEAD
-  const { barberId,date} = req.body;
-
-  console.log('Decoded User from JWT:', req.user);
-
-  // Inside any route handler or middleware
-=======
   const { barberId, date } = req.body;
 
   console.log('=== DASHBOARD DEBUG START ===');
   console.log('Request body:', req.body);
   console.log('Decoded User from JWT:', req.user);
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
   console.log('Authorization Header:', req.headers.authorization);
 
   // Use logged-in barber's ID if not specified and user is a barber
   const targetBarberId = barberId || (req.user.role === 'barber' ? req.user.id : null);
-  
+
   // If no barberId is specified and user is not a barber
   if (!targetBarberId) {
     return next(new ErrorResponse('Please provide a barber ID', 400));
   }
-  
-<<<<<<< HEAD
-=======
+
   console.log('Target Barber ID:', targetBarberId);
   console.log('Target Barber ID Type:', typeof targetBarberId);
-  
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
+
   // If barber is trying to access another barber's dashboard
   if (req.user.role === 'barber' && req.user.id !== targetBarberId) {
     return next(new ErrorResponse('Not authorized to access this dashboard', 403));
   }
-  
+
   // Default to today if no date specified
   const targetDate = date || new Date().toISOString().split('T')[0];
-<<<<<<< HEAD
-=======
   console.log('Target Date:', targetDate);
   console.log('Target Date Type:', typeof targetDate);
-  
+
   // DEBUG: Check what's in the database
   console.log('=== DATABASE CONTENT CHECK ===');
-  
+
   // Check all appointments for this barber (regardless of date/status)
   const allBarberAppointments = await Appointment.find({ barberId: targetBarberId });
   console.log(`Total appointments for barber ${targetBarberId}:`, allBarberAppointments.length);
   console.log('Sample appointment:', allBarberAppointments[0]);
-  
+
   // Check all walk-ins for this barber
   const allBarberWalkIns = await WalkIn.find({ barberId: targetBarberId });
   console.log(`Total walk-ins for barber ${targetBarberId}:`, allBarberWalkIns.length);
   console.log('Sample walk-in:', allBarberWalkIns[0]);
-  
+
   // Check what dates exist in appointments
   const appointmentDates = await Appointment.distinct('date', { barberId: targetBarberId });
   console.log('Available appointment dates:', appointmentDates);
-  
+
   // Check what dates exist in walk-ins
   const walkInDates = await WalkIn.distinct('date', { barberId: targetBarberId });
   console.log('Available walk-in dates:', walkInDates);
-  
+
   // Check pending appointments with different query variations
   console.log('=== PENDING APPOINTMENTS DEBUG ===');
-  
+
   // Check what STATUS values are available
   console.log('STATUS constants:', STATUS);
-  
+
   // Check all appointments regardless of status
   const allAppointments = await Appointment.find({ barberId: targetBarberId });
   console.log('All appointments for barber:', allAppointments.map(apt => ({
@@ -86,7 +73,7 @@ exports.getDashboardData = asyncHandler(async (req, res, next) => {
     date: apt.date,
     dateType: typeof apt.date
   })));
-  
+
   // Check all waiting queue entries
   const allWaitingQueue = await WaitingQueue.find({ barberId: targetBarberId });
   console.log('All waiting queue entries:', allWaitingQueue.map(wq => ({
@@ -96,7 +83,7 @@ exports.getDashboardData = asyncHandler(async (req, res, next) => {
     dateType: typeof wq.date,
     position: wq.position
   })));
-  
+
   // Check all walk-ins
   const allWalkIns = await WalkIn.find({ barberId: targetBarberId });
   console.log('All walk-ins:', allWalkIns.map(wi => ({
@@ -107,18 +94,14 @@ exports.getDashboardData = asyncHandler(async (req, res, next) => {
   })));
 
   console.log('=== ORIGINAL QUERIES DEBUG ===');
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
-  
+
   // Get working hours
   const workingHours = await WorkingHours.findOne({
     barberId: targetBarberId,
     date: targetDate
-  }); 
-<<<<<<< HEAD
-=======
+  });
   console.log('Working hours found:', !!workingHours);
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
-  
+
   // Get pending appointments
   const pendingAppointments = await Appointment.find({
     barberId: targetBarberId,
@@ -127,11 +110,8 @@ exports.getDashboardData = asyncHandler(async (req, res, next) => {
     path: 'customerId',
     select: 'name email phoneNumber'
   }).sort('date requestedTime');
-<<<<<<< HEAD
-=======
   console.log('Pending appointments query result:', pendingAppointments.length);
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
-  
+
   // Get approved appointments for the day
   const approvedAppointments = await Appointment.find({
     barberId: targetBarberId,
@@ -141,52 +121,44 @@ exports.getDashboardData = asyncHandler(async (req, res, next) => {
     path: 'customerId',
     select: 'name email phoneNumber'
   }).sort('startTime');
-<<<<<<< HEAD
-=======
   console.log('Approved appointments query result:', approvedAppointments.length);
   console.log('Approved appointments query conditions:', {
     barberId: targetBarberId,
     date: targetDate,
     status: STATUS.APPROVED
   });
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
-  
+
   // Get walk-ins for the day
   const walkIns = await WalkIn.find({
     barberId: targetBarberId,
     date: targetDate
   }).sort('arrivalTime');
-<<<<<<< HEAD
-=======
   console.log('Walk-ins query result:', walkIns.length);
   console.log('Walk-ins query conditions:', {
     barberId: targetBarberId,
     date: targetDate
   });
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
-  
+
   // Get waiting queue
   const waitingQueue = await WaitingQueue.find({
     barberId: targetBarberId,
     date: targetDate,
     status: STATUS.WAITING
   }).sort('position');
-<<<<<<< HEAD
-=======
   console.log('Waiting queue query result:', waitingQueue.length);
   console.log('Waiting queue query conditions:', {
     barberId: targetBarberId,
     date: targetDate,
     status: STATUS.WAITING
   });
-  
+
   // Let's also try querying without the date filter to see if date is the issue
   const waitingQueueNoDate = await WaitingQueue.find({
     barberId: targetBarberId,
     status: STATUS.WAITING
   });
   console.log('Waiting queue WITHOUT date filter:', waitingQueueNoDate.length);
-  
+
   // Check if your "waiting" entry matches the exact query
   const exactMatch = await WaitingQueue.findOne({
     barberId: targetBarberId,
@@ -203,13 +175,12 @@ exports.getDashboardData = asyncHandler(async (req, res, next) => {
       position: exactMatch.position
     });
   }
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
-  
+
   // Populate the queue with source details
   const populatedQueue = await Promise.all(
     waitingQueue.map(async (entry) => {
       let sourceData = null;
-      
+
       if (entry.sourceType === 'appointment') {
         sourceData = await Appointment.findById(entry.sourceId)
           .populate({
@@ -219,25 +190,22 @@ exports.getDashboardData = asyncHandler(async (req, res, next) => {
       } else {
         sourceData = await WalkIn.findById(entry.sourceId);
       }
-      
+
       return {
         ...entry.toObject(),
         sourceData
       };
     })
   );
-  
+
   // Get current service (ongoing)
   const currentService = await WaitingQueue.findOne({
     barberId: targetBarberId,
     date: targetDate,
     status: STATUS.ONGOING
   });
-<<<<<<< HEAD
-=======
   console.log('Current service found:', !!currentService);
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
-  
+
   let currentServiceData = null;
   if (currentService) {
     if (currentService.sourceType === 'appointment') {
@@ -250,22 +218,19 @@ exports.getDashboardData = asyncHandler(async (req, res, next) => {
       currentServiceData = await WalkIn.findById(currentService.sourceId);
     }
   }
-  
+
   // Get completed services for the day
   const completedServices = await WaitingQueue.find({
     barberId: targetBarberId,
     date: targetDate,
     status: STATUS.COMPLETED
   }).sort('updatedAt');
-<<<<<<< HEAD
-=======
   console.log('Completed services query result:', completedServices.length);
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
-  
+
   const populatedCompletedServices = await Promise.all(
     completedServices.map(async (entry) => {
       let sourceData = null;
-      
+
       if (entry.sourceType === 'appointment') {
         sourceData = await Appointment.findById(entry.sourceId)
           .populate({
@@ -275,14 +240,14 @@ exports.getDashboardData = asyncHandler(async (req, res, next) => {
       } else {
         sourceData = await WalkIn.findById(entry.sourceId);
       }
-      
+
       return {
         ...entry.toObject(),
         sourceData
       };
     })
   );
-  
+
   // Calculate metrics
   const metrics = {
     totalAppointments: approvedAppointments.length,
@@ -292,13 +257,9 @@ exports.getDashboardData = asyncHandler(async (req, res, next) => {
     completed: populatedCompletedServices.length
   };
 
-<<<<<<< HEAD
-  console.log(metrics);
-=======
   console.log('Final metrics:', metrics);
   console.log('=== DASHBOARD DEBUG END ===');
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
-  
+
   res.status(200).json({
     success: true,
     data: {
@@ -311,12 +272,8 @@ exports.getDashboardData = asyncHandler(async (req, res, next) => {
         sourceData: currentServiceData
       } : null,
       waitingQueue: populatedQueue,
-<<<<<<< HEAD
-      completedServices: populatedCompletedServices
-=======
       completedServices: populatedCompletedServices,
-      WalkIn: WalkIn 
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
+      WalkIn: WalkIn
     }
   });
 });
@@ -326,10 +283,10 @@ exports.getDashboardData = asyncHandler(async (req, res, next) => {
 // @access  Private (Admin only)
 exports.getAdminDashboard = asyncHandler(async (req, res, next) => {
   const { date } = req.body;
-  
+
   // Default to today if no date specified
   const targetDate = date || new Date().toISOString().split('T')[0];
-  
+
   // Get all appointments for the day
   const appointments = await Appointment.find({
     date: targetDate
@@ -343,7 +300,7 @@ exports.getAdminDashboard = asyncHandler(async (req, res, next) => {
       select: 'name'
     }
   ]);
-  
+
   // Get all walk-ins for the day
   const walkIns = await WalkIn.find({
     date: targetDate
@@ -351,7 +308,7 @@ exports.getAdminDashboard = asyncHandler(async (req, res, next) => {
     path: 'barberId',
     select: 'name'
   });
-  
+
   // Get all waiting queue entries for the day
   const waitingQueue = await WaitingQueue.find({
     date: targetDate,
@@ -360,7 +317,7 @@ exports.getAdminDashboard = asyncHandler(async (req, res, next) => {
     path: 'barberId',
     select: 'name'
   }).sort('position');
-  
+
   // Calculate metrics by status
   const appointmentsByStatus = {
     [STATUS.PENDING_APPROVAL]: appointments.filter(a => a.status === STATUS.PENDING_APPROVAL).length,
@@ -369,13 +326,13 @@ exports.getAdminDashboard = asyncHandler(async (req, res, next) => {
     [STATUS.ONGOING]: appointments.filter(a => a.status === STATUS.ONGOING).length,
     [STATUS.COMPLETED]: appointments.filter(a => a.status === STATUS.COMPLETED).length
   };
-  
+
   const walkInsByStatus = {
     [STATUS.WAITING]: walkIns.filter(w => w.status === STATUS.WAITING).length,
     [STATUS.ONGOING]: walkIns.filter(w => w.status === STATUS.ONGOING).length,
     [STATUS.COMPLETED]: walkIns.filter(w => w.status === STATUS.COMPLETED).length
   };
-  
+
   // Calculate additional stats
   const metrics = {
     totalAppointments: appointments.length,
@@ -384,7 +341,7 @@ exports.getAdminDashboard = asyncHandler(async (req, res, next) => {
     walkInsByStatus,
     inQueue: waitingQueue.length
   };
-  
+
   res.status(200).json({
     success: true,
     data: {

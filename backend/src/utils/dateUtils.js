@@ -107,18 +107,11 @@ const getMinutesBetweenTimes = (startTime, endTime) => {
   return endTotalMinutes - startTotalMinutes;
 };
 
-<<<<<<< HEAD
-=======
 
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
 module.exports = {
   isValid24HourTime,
   isValidDateFormat,
   compareTimeStrings,
   addMinutesToTime,
-<<<<<<< HEAD
-  getMinutesBetweenTimes
-=======
   getMinutesBetweenTimes,
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
 };

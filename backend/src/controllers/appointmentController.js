@@ -4,20 +4,6 @@ const Appointment = require('../models/Appointment');
 const User = require('../models/User');
 const WaitingQueue = require('../models/WaitingQueue');
 const STATUS = require('../constants/status');
-<<<<<<< HEAD
-const { 
-  sendAppointmentStatusNotification
-} = require('../services/notificationService');
-const { addMinutesToTime } = require('../utils/dateUtils');
-const { 
-  isTimeSlotAvailable, 
-  findNextAvailableSlot 
-} = require('../services/findAvailableTimeSlot');
-const { 
-  addAppointmentToQueue 
-} = require('../services/queueManagerService');
-
-=======
 const {
   sendAppointmentStatusNotification
 } = require('../services/notificationService');
@@ -42,7 +28,6 @@ const calculateEndTime = (startTime, duration) => {
   return addMinutesToTime(startTime, duration);
 };
 
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
 // Service durations in minutes (simplified example)
 const SERVICE_DURATIONS = {
   'haircut': 30,
@@ -65,27 +50,6 @@ const DEFAULT_DURATION = 30;
 // @access  Private
 exports.checkAvailability = asyncHandler(async (req, res, next) => {
   const { barberId, date, requestedTime, service } = req.body;
-<<<<<<< HEAD
-  
-  // Calculate estimated time based on service
-  const serviceKey = service.toLowerCase().replace(/\s+/g, '-');
-  const estimatedTime = SERVICE_DURATIONS[serviceKey] || DEFAULT_DURATION;
-  
-  // Calculate end time based on requested time
-  const startTime = requestedTime;
-  const endTime = addMinutesToTime(startTime, estimatedTime);
-  
-  // Check if the time slot is available
-  const isAvailable = await isTimeSlotAvailable(
-    barberId,
-    date,
-    startTime,
-    endTime
-  );
-  
-  if (!isAvailable) {
-    // Find next available slot
-=======
 
   console.log("\nbarberId ", barberId, "\ndate ", date, "\nrequestedTime ", requestedTime, "\nservice ", service, "\n");
 
@@ -100,17 +64,12 @@ exports.checkAvailability = asyncHandler(async (req, res, next) => {
   // Check if slot is available
   const isAvailable = await isTimeSlotAvailable(barberId, date, startTime, endTime);
   if (!isAvailable) {
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
     const nextSlot = await findNextAvailableSlot(
       barberId,
       date,
       startTime,
       estimatedTime
     );
-<<<<<<< HEAD
-    
-=======
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
     if (!nextSlot) {
       return next(
         new ErrorResponse(
@@ -119,10 +78,6 @@ exports.checkAvailability = asyncHandler(async (req, res, next) => {
         )
       );
     }
-<<<<<<< HEAD
-    
-=======
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
     return res.status(200).json({
       success: false,
       message: 'Requested time slot is not available',
@@ -131,12 +86,6 @@ exports.checkAvailability = asyncHandler(async (req, res, next) => {
     });
   }
 
-<<<<<<< HEAD
-  // If slot is available, return confirmation
-  res.status(200).json({
-    success: true,
-    message: 'Time slot is available',
-=======
   // Atomically reserve the slot
   const reservation = await AtomicReservationService.reserveTimeSlot(
     barberId,
@@ -158,7 +107,6 @@ exports.checkAvailability = asyncHandler(async (req, res, next) => {
   return res.status(200).json({
     success: true,
     message: 'Time slot is available and reserved',
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
     confirmedSlot: {
       startTime,
       endTime,
@@ -171,34 +119,18 @@ exports.checkAvailability = asyncHandler(async (req, res, next) => {
   });
 });
 
-<<<<<<< HEAD
-=======
 
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
 // @desc    Create new appointment
 // @route   POST /api/appointments
 // @access  Private
 exports.createAppointment = asyncHandler(async (req, res, next) => {
   // Add user ID to request body
   req.body.customerId = req.user.id;
-<<<<<<< HEAD
-  
-=======
 
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
   // Calculate estimated time based on service
   const serviceKey = req.body.service.toLowerCase().replace(/\s+/g, '-');
   const estimatedTime = SERVICE_DURATIONS[serviceKey] || DEFAULT_DURATION;
   req.body.estimatedTime = estimatedTime;
-<<<<<<< HEAD
-  
-  // Validate barber exists
-  const barber = await User.findOne({ 
-    _id: req.body.barberId,
-    role: 'barber'
-  });
-  
-=======
 
   // Validate barber exists
   const barber = await User.findOne({
@@ -206,7 +138,6 @@ exports.createAppointment = asyncHandler(async (req, res, next) => {
     role: 'barber'
   });
 
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
   if (!barber) {
     return next(new ErrorResponse('Barber not found', 404));
   }
@@ -222,55 +153,6 @@ exports.createAppointment = asyncHandler(async (req, res, next) => {
 
   // Calculate start and end time based on requested time
   const startTime = req.body.requestedTime;
-<<<<<<< HEAD
-  const endTime = addMinutesToTime(startTime, estimatedTime);
-  
-  // Perform final availability check before creating appointment
-  const isAvailable = await isTimeSlotAvailable(
-    req.body.barberId,
-    req.body.date,
-    startTime,
-    endTime
-  );
-  
-  if (!isAvailable) {
-    // Find next available slot
-    const nextSlot = await findNextAvailableSlot(
-      req.body.barberId,
-      req.body.date,
-      startTime,
-      estimatedTime
-    );
-    
-    if (!nextSlot) {
-      return next(
-        new ErrorResponse(
-          `No available slots for ${req.body.date}. Please try another date.`,
-          400
-        )
-      );
-    }
-    
-    return res.status(409).json({
-      success: false,
-      message: 'Requested time slot is not available',
-      suggestedSlot: nextSlot
-    });
-  }
-
-  req.body.startTime = startTime;
-  req.body.endTime = endTime;
-  
-  // Set initial status
-  req.body.status = STATUS.PENDING_APPROVAL;
-  
-  // Create appointment
-  const appointment = await Appointment.create(req.body);
-  
-  res.status(201).json({
-    success: true,
-    data: appointment
-=======
   // const endTime = addMinutesToTime(startTime, estimatedTime);
 
   // Perform final availability check before creating appointment
@@ -334,7 +216,6 @@ exports.createAppointment = asyncHandler(async (req, res, next) => {
     success: true,
     data: appointment,
     messsage: 'Appointment Successfully created! check your email for confirmation.'
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
   });
 });
 
@@ -377,19 +258,11 @@ exports.confirmSuggestedAppointment = asyncHandler(async (req, res, next) => {
 // @access  Private (Admin/Barber)
 exports.getAppointments = asyncHandler(async (req, res, next) => {
   let query;
-<<<<<<< HEAD
-  
-  // Allow barbers to see only their appointments
-  if (req.user.role === 'barber') {
-    query = Appointment.find({ barberId: req.user.id });
-  } 
-=======
 
   // Allow barbers to see only their appointments
   if (req.user.role === 'barber') {
     query = Appointment.find({ barberId: req.user.id });
   }
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
   // Customers can see only their appointments
   else if (req.user.role === 'customer') {
     query = Appointment.find({ customerId: req.user.id });
@@ -398,35 +271,20 @@ exports.getAppointments = asyncHandler(async (req, res, next) => {
   else {
     query = Appointment.find();
   }
-<<<<<<< HEAD
-  
-=======
 
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
   // Filter by date if provided
   if (req.body.date) {
     query = query.find({ date: req.body.date });
   }
-<<<<<<< HEAD
-  
-=======
 
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
   // Filter by status if provided
   if (req.body.status) {
     query = query.find({ status: req.body.status });
   }
-<<<<<<< HEAD
-  
-  // Sort by date and time
-  query = query.sort({ date: 1, requestedTime: 1 });
-  
-=======
 
   // Sort by date and time
   query = query.sort({ date: 1, requestedTime: 1 });
 
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
   // Execute query
   const appointments = await query
     .populate({
@@ -437,11 +295,7 @@ exports.getAppointments = asyncHandler(async (req, res, next) => {
       path: 'barberId',
       select: 'name'
     });
-<<<<<<< HEAD
-  
-=======
 
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
   res.status(200).json({
     success: true,
     count: appointments.length,
@@ -462,19 +316,11 @@ exports.getAppointment = asyncHandler(async (req, res, next) => {
       path: 'barberId',
       select: 'name'
     });
-<<<<<<< HEAD
-  
-  if (!appointment) {
-    return next(new ErrorResponse(`Appointment not found with id ${req.body.id}`, 404));
-  }
-  
-=======
 
   if (!appointment) {
     return next(new ErrorResponse(`Appointment not found with id ${req.body.id}`, 404));
   }
 
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
   // Check if user is authorized to view this appointment
   if (
     req.user.role !== 'admin' &&
@@ -483,11 +329,7 @@ exports.getAppointment = asyncHandler(async (req, res, next) => {
   ) {
     return next(new ErrorResponse('Not authorized to access this appointment', 403));
   }
-<<<<<<< HEAD
-  
-=======
 
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
   res.status(200).json({
     success: true,
     data: appointment
@@ -498,63 +340,6 @@ exports.getAppointment = asyncHandler(async (req, res, next) => {
 // @route   PUT /api/appointments/:id
 // @access  Private (Barber/Admin only)
 exports.updateAppointmentStatus = asyncHandler(async (req, res, next) => {
-<<<<<<< HEAD
-
-  let appointment = await Appointment.findById(req.body.appointmentId);
-  let Queue = await WaitingQueue.findById(req.body._id);
-  if (!Queue) {
-    return next(new ErrorResponse(`Appointment not found with id ${req.body._id}`, 404));
-  }
-  
-  // Check authorization
-  if (
-    req.user.role !== 'admin' &&
-    req.user.id !== appointment.barberId.toString()
-  ) {
-    return next(new ErrorResponse('Not authorized to update this appointment', 403));
-  }
-  
-  // Get the new status
-  const { status } = req.body;
-  
-  if (!Object.values(STATUS).includes(status)) {
-    return next(new ErrorResponse('Invalid status value', 400));
-  }
-  
-  // Handle different status updates
-  if (status === STATUS.APPROVED) {
-    // Calculate start and end times if not set
-    if (!appointment.startTime) {
-      appointment.startTime = appointment.requestedTime;
-      appointment.endTime = addMinutesToTime(
-        appointment.requestedTime, 
-        appointment.estimatedTime
-      );
-    }
-    
-    // Add to waiting queue if approved
-    await addAppointmentToQueue(appointment._id);
-  }
-  
-  // Update the status
-  appointment.status = status;
-  
-  appointment = await appointment.save();
-  
-  // Send notification
-  const customer = await User.findById(appointment.customerId);
-  if (customer) {
-    await sendAppointmentStatusNotification(appointment, customer, status);
-  }
-  
- if (status === STATUS.ONGOING || status === STATUS.REJECTED || status === STATUS.COMPLETED || status === STATUS.WAITING || status === STATUS.PENDING_APPROVAL_BARBER ) {
-  Queue.status = status;
-  Queue = await Queue.save();
- }
-  res.status(200).json({
-    success: true,
-    data: appointment
-=======
   console.log("\n=== UPDATE APPOINTMENT STATUS CONTROLLER ===");
   console.log("Request body:", req.body);
   console.log("Request params:", req.params);
@@ -769,7 +554,6 @@ exports.updateAppointmentStatus = asyncHandler(async (req, res, next) => {
     success: true,
     data: appointment,
     message: `Appointment ${appointment.status.toLowerCase()} successfully`
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
   });
 });
 
@@ -778,19 +562,11 @@ exports.updateAppointmentStatus = asyncHandler(async (req, res, next) => {
 // @access  Private
 exports.deleteAppointment = asyncHandler(async (req, res, next) => {
   const appointment = await Appointment.findById(req.body.id);
-<<<<<<< HEAD
-  
-  if (!appointment) {
-    return next(new ErrorResponse(`Appointment not found with id ${req.body.id}`, 404));
-  }
-  
-=======
 
   if (!appointment) {
     return next(new ErrorResponse(`Appointment not found with id ${req.body.id}`, 404));
   }
 
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
   // Check authorization
   if (
     req.user.role !== 'admin' &&
@@ -799,11 +575,7 @@ exports.deleteAppointment = asyncHandler(async (req, res, next) => {
   ) {
     return next(new ErrorResponse('Not authorized to delete this appointment', 403));
   }
-<<<<<<< HEAD
-  
-=======
 
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
   // Only allow deletion of pending appointments
   if (appointment.status !== STATUS.PENDING_APPROVAL) {
     return next(
@@ -813,15 +585,9 @@ exports.deleteAppointment = asyncHandler(async (req, res, next) => {
       )
     );
   }
-<<<<<<< HEAD
-  
-  await appointment.deleteOne();
-  
-=======
 
   await appointment.deleteOne();
 
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
   res.status(200).json({
     success: true,
     data: {}
@@ -841,13 +607,6 @@ exports.rejectAppointment = asyncHandler(async (req, res, next) => {
 // @route   PUT /api/appointments/:id/approve
 // @access  Private (Barber/Admin)
 exports.approveAppointment = asyncHandler(async (req, res, next) => {
-<<<<<<< HEAD
-  req.body.status = STATUS.APPROVED;
-  req.body.appointmentId = req.params.id;
-
-  return exports.updateAppointmentStatus(req, res, next);
-});
-=======
   console.log("Approving appointment:", req.params.id);
   console.log("Request Body before change:", req.body);
   req.body.status = STATUS.APPROVED;
@@ -1010,4 +769,3 @@ exports.resendVerificationEmail = asyncHandler(async (req, res, next) => {
 });
 
 
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)

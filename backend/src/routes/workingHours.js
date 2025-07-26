@@ -8,11 +8,7 @@ const {
   getWorkingHoursByBarberAndDate,
   createWorkingHoursWithReplacement
 } = require('../controllers/workingHoursController');
-<<<<<<< HEAD
-const validateRequest = require('../middleware/validator');
-=======
 const {validateRequest} = require('../middleware/validator');
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
 const { protect, authorize } = require('../middleware/auth');
 
 const router = express.Router();

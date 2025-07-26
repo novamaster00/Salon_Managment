@@ -19,14 +19,6 @@ import { register as apiRegister } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import Layout from '@/components/Layout';
 
-<<<<<<< HEAD
-const formSchema = z.object({
-  name: z.string().min(2, { message: 'Name must be at least 2 characters' }),
-  email: z.string().email({ message: 'Please enter a valid email address' }),
-  password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
-  confirmPassword: z.string(),
-  role: z.enum(['customer', 'barber', 'admin'], { 
-=======
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters' }),
@@ -45,29 +37,20 @@ const formSchema = z.object({
   confirmPassword: z.string(),
 
   role: z.enum(['customer', 'barber', 'admin'], {
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
     required_error: 'Please select a role'
   })
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
-<<<<<<< HEAD
-  path: ["confirmPassword"],
-});
-=======
   path: ['confirmPassword'],
 })
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
 
 export default function Register() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { login: authLogin } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-<<<<<<< HEAD
-=======
   const [isRegistered, setIsRegistered] = useState(false);
   const [userEmail, setUserEmail] = useState('');
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -76,10 +59,7 @@ export default function Register() {
       email: '',
       password: '',
       confirmPassword: '',
-<<<<<<< HEAD
-=======
       phone:'',
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
       role: 'customer'
     },
   });
@@ -91,25 +71,6 @@ export default function Register() {
         values.email, 
         values.password, 
         values.role,
-<<<<<<< HEAD
-        values.name
-      );
-      
-      authLogin(response.token, response.user);
-      
-      toast({
-        title: 'Registration successful',
-        description: `Welcome, ${values.name}!`,
-      });
-      
-      // Redirect based on role
-      if (values.role === 'admin' || values.role === 'barber') {
-        navigate('/dashboard');
-      } else {
-        navigate('/');
-      }
-    } catch (error) {
-=======
         values.name,
         values.phone,
       );
@@ -133,7 +94,6 @@ export default function Register() {
       // }
     } catch (error) {
       console.error('Registration error, error');
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
       toast({
         title: 'Registration failed',
         description: error instanceof Error ? error.message : 'An error occurred during registration',
@@ -144,8 +104,6 @@ export default function Register() {
     }
   }
 
-<<<<<<< HEAD
-=======
 
   if (isRegistered) {
     return (
@@ -202,7 +160,6 @@ export default function Register() {
     );
   }
   
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
   return (
     <Layout>
       <div className="max-w-md mx-auto">
@@ -237,8 +194,6 @@ export default function Register() {
                 </FormItem>
               )}
             />
-<<<<<<< HEAD
-=======
 
             <FormField
               control={form.control}
@@ -253,7 +208,6 @@ export default function Register() {
                 </FormItem>
               )}
             />
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
             
             <FormField
               control={form.control}
@@ -341,9 +295,5 @@ export default function Register() {
       </div>
     </Layout>
   );
-<<<<<<< HEAD
-}
-=======
  }
 
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)

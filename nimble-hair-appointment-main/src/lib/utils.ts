@@ -4,8 +4,6 @@ import { twMerge } from "tailwind-merge"
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
-<<<<<<< HEAD
-=======
 
 // Email validation utility
 export const isValidEmail = (email: string): boolean => {
@@ -38,4 +36,3 @@ export const validatePassword = (password: string): { isValid: boolean; message:
   
   return { isValid: true, message: 'Password is strong' };
 };
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)

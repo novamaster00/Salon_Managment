@@ -4,10 +4,7 @@ const WalkIn = require('../models/WalkIn');
 const WaitingQueue = require('../models/WaitingQueue');
 const User = require('../models/User');
 const STATUS = require('../constants/status');
-<<<<<<< HEAD
-=======
 const AtomicReservationService = require('../services/atomicReservationService');
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
 const { addMinutesToTime } = require('../utils/dateUtils');
 const { 
   sendWalkInNotification,
@@ -20,13 +17,10 @@ const {
   addWalkInToQueue 
 } = require('../services/queueManagerService');
 
-<<<<<<< HEAD
-=======
 const calculateEndTime = (startTime, duration) => {
   return addMinutesToTime(startTime, duration);
 };
 
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
 // Service durations in minutes (simplified example)
 const SERVICE_DURATIONS = {
   'haircut': 30,
@@ -80,11 +74,6 @@ exports.createWalkIn = asyncHandler(async (req, res, next) => {
     );
   }
   
-<<<<<<< HEAD
-  // Set start and end time
-  req.body.startTime = nextSlot.start;
-  req.body.endTime = nextSlot.end;
-=======
   // Calculate end time using helper function
 const endTime = calculateEndTime(nextSlot.start, estimatedTime);
 
@@ -126,18 +115,12 @@ if (!hasValidReservation) {
   // Set calculated end time
   req.body.startTime = nextSlot.start;
   req.body.endTime = endTime;
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
   
   // Set initial status
   req.body.status = STATUS.WAITING;
   
   // Create walk-in - FIX: Use a different variable name here to avoid conflict
   const newWalkIn = await WalkIn.create(req.body);
-<<<<<<< HEAD
-  
-  // Add to waiting WalkIn
-  await addWalkInToQueue(newWalkIn._id);
-=======
 
   //can create ambiguty
   req.body.walkInId = walkInId; 
@@ -152,7 +135,6 @@ if (!hasValidReservation) {
     nextSlot.start,
     walkInId
   )
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
   
   // Send notifications
   await sendWalkInNotification(newWalkIn);

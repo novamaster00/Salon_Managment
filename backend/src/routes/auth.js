@@ -7,14 +7,6 @@ const {
   updatePassword,
   handleLogoutUser,
   handleRefreshToken,
-<<<<<<< HEAD
-} = require('../controllers/authController');
-const validateRequest = require('../middleware/validator');
-const { protect } = require('../middleware/auth');
-
-const router = express.Router();
-
-=======
   verifyEmail,
   resendVerificationEmail,
   getUserProfile,
@@ -32,7 +24,6 @@ const router = express.Router();
 
 
 
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
 router.post('/register', validateRequest('auth', 'register'), register);
 router.post('/login', validateRequest('auth', 'login'), login);
 router.get('/me', protect, getMe);
@@ -40,12 +31,6 @@ router.put('/updatedetails', protect, updateDetails);
 router.put('/updatepassword', protect, updatePassword);
 router.get('/logout',handleLogoutUser);
 router.get('/refresh', handleRefreshToken);
-<<<<<<< HEAD
-
-
-
-module.exports = router;
-=======
 router.get('/verify-email',verifyEmail);
 router.post('/resend-verification', resendVerificationEmail);
 router.get('/refresh', handleRefreshToken);
@@ -61,4 +46,3 @@ router.put('/profile/:userId/password', protect, changePassword);
 
 
 module.exports = router;
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)

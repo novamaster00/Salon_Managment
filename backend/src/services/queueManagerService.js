@@ -6,10 +6,7 @@ const generateToken = require('../utils/generateToken');
 const STATUS = require('../constants/status');
 const { sendTokenAssignmentNotification } = require('./notificationService');
 const { addMinutesToTime } = require('../utils/dateUtils');
-<<<<<<< HEAD
-=======
 const { default: mongoose } = require('mongoose');
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
 
 /**
  * Add an appointment to the waiting queue
@@ -18,69 +15,6 @@ const { default: mongoose } = require('mongoose');
  * @param {boolean} sendNotification - Whether to send a notification
  * @returns {Promise<Object>} - The created queue entry
  */
-<<<<<<< HEAD
-const addAppointmentToQueue = async (appointmentId, sendNotification = true) => {
-  const appointment = await Appointment.findById(appointmentId).populate('customerId');
-  
-  if (!appointment) {
-    throw new Error('Appointment not found');
-  }
-  
-  if (appointment.status !== STATUS.APPROVED) {
-    throw new Error('Only approved appointments can be added to the queue');
-  }
-  
-  // Check if already in queue
-  const existingEntry = await WaitingQueue.findOne({
-    sourceType: 'appointment',
-    sourceId: appointmentId
-  });
-  
-  if (existingEntry) {
-    return existingEntry;
-  }
-  
-  // Generate token if not already set
-  if (!appointment.tokenNumber) {
-    appointment.tokenNumber = generateToken('appointment', new Date(appointment.date));
-    await appointment.save();
-  }
-  
-  // Get the current position in queue
-  const highestPosition = await WaitingQueue.findOne({ 
-    barberId: appointment.barberId,
-    date: appointment.date
-  }).sort('-position');
-  
-  const position = highestPosition ? highestPosition.position + 1 : 1;
-  
-  // Calculate estimated start time (simplified)
-  let estimatedStartTime = appointment.startTime || appointment.requestedTime;
-  
-  // Create queue entry
-  const queueEntry = await WaitingQueue.create({
-    barberId: appointment.barberId,
-    date: appointment.date,
-    tokenNumber: appointment.tokenNumber,
-    sourceType: 'appointment',
-    sourceId: appointmentId,
-    estimatedTime: appointment.estimatedTime,
-    estimatedStartTime,
-    position,
-    status: STATUS.WAITING
-  });
-  
-  // Populate the source for notification
-  queueEntry.sourceId = appointment;
-  queueEntry.sourceId.customer = appointment.customerId;
-  
-  // Send notification
-  if (sendNotification) {
-    await sendTokenAssignmentNotification(queueEntry);
-  }
-  
-  return queueEntry;
-=======
 const addAppointmentToQueue = async (appointmentMOD, sendNotification = true, allowAnyStatus = false) => {
   try {
     console.log("\n\n\n\n\n\n\n\n\n\n====addAppointmentToQueue started====");
@@ -218,7 +152,6 @@ const addAppointmentToQueue = async (appointmentMOD, sendNotification = true, al
     console.error("Stack trace:", error.stack);
     throw error; // Re-throw the error so it can be caught by the caller
   }
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
 };
 
 /**
@@ -434,11 +367,8 @@ const recalculateWaitTimes = async (barberId, date) => {
   }
 };
 
-<<<<<<< HEAD
-=======
 
 
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
 module.exports = {
   addAppointmentToQueue,
   addWalkInToQueue,

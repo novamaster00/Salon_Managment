@@ -11,10 +11,7 @@ export interface User {
 export interface AuthResponse {
   token: string;
   user: User;
-<<<<<<< HEAD
-=======
   success?:boolean;
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
 }
 
 export interface Barber {
@@ -34,10 +31,7 @@ export interface Appointment {
   endTime: string; // ISO date string
   status: AppointmentStatus;
   tokenNumber?: string;
-<<<<<<< HEAD
-=======
   
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
 }
 
 export interface WalkIn {
@@ -162,10 +156,7 @@ export interface AvailableSlotRequest {
   date: string; // YYYY-MM-DD
   requestedTime: string; // HH:mm
   service:string;
-<<<<<<< HEAD
-=======
   // email:string;//new add on because of reservation system. 
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
 }
 
 export interface StatusUpdateRequest {
@@ -208,11 +199,6 @@ export interface DashboardResponse {
     currentService: null | any;
     waitingQueue: Array<QueueEntry>;
     completedServices: any[];
-<<<<<<< HEAD
-    queue: QueueEntry[];
-  };
-}
-=======
     WalkIn: any[]; // Add this line to fix the TypeScript error
     queue: QueueEntry[];
  
@@ -245,4 +231,3 @@ export interface ValidateTokenResponse {
   email?: string;
   remainingMinutes?: number;
 }
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)

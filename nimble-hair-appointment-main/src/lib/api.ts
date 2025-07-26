@@ -1,8 +1,5 @@
 
-<<<<<<< HEAD
-=======
 import { Phone } from 'lucide-react';
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
 import { 
   AuthResponse, 
   Appointment, 
@@ -16,12 +13,6 @@ import {
   User,
   DashboardResponse ,
   AppointmentStatus,
-<<<<<<< HEAD
-  WorkingHoursInput
-} from './types';
-
-const API_URL = import.meta.env.VITE_BACKEND_URL; // Replace with actual API URL
-=======
   WorkingHoursInput,
   ForgotPasswordResponse,
   ResetPasswordRequest,
@@ -31,7 +22,6 @@ const API_URL = import.meta.env.VITE_BACKEND_URL; // Replace with actual API URL
 
 const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000/api';
 console.log("API_URL",import.meta.env.VITE_BACKEND_URL);
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
 
 // Helper function to handle API responses
 export async function handleResponse<T>(response: Response): Promise<T> {
@@ -109,10 +99,7 @@ export async function login(email: string, password: string): Promise<AuthRespon
       headers: {
         'Content-Type': 'application/json',
       },
-<<<<<<< HEAD
-=======
       credentials: 'include',
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
       body: JSON.stringify({ email, password }),
     });
     
@@ -121,15 +108,12 @@ export async function login(email: string, password: string): Promise<AuthRespon
     if (!response.ok) {
       // Try to get error message from response
       const errorData = await response.json().catch(() => null);
-<<<<<<< HEAD
-=======
 
       // Handle specific verification error
       if (errorData?.needsVerification) {
         throw new Error('Please verify your email before logging in. Check your inbox for the verification link.');
       }
 
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
       throw new Error(errorData?.message || `API Error: ${response.status}`);
     }
     
@@ -148,20 +132,6 @@ export async function login(email: string, password: string): Promise<AuthRespon
   }
 }
 
-<<<<<<< HEAD
-export async function register(email: string, password: string, role: string, name?: string): Promise<AuthResponse> {
-  const response = await fetch(`${API_URL}/auth/register`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ email, password, role, name }),
-  });
-  return handleResponse<AuthResponse>(response);
-}
-
-
-=======
 export async function register(
   email: string, 
   password: string, 
@@ -374,7 +344,6 @@ export const validateResetToken = async (token: string): Promise<ValidateTokenRe
   }
 };
 
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
 
 export async function getWaitingQueue(barberId: string, date: string): Promise<QueueEntry[]> {
   const token = localStorage.getItem('token'); // Or however you store your auth token
@@ -425,8 +394,6 @@ export async function createAppointment(data: any): Promise<Appointment> {
   return handleResponse<Appointment>(response);
 }
 
-<<<<<<< HEAD
-=======
 
 // Walk-in API calls
 export async function createWalkIn(data: any): Promise<WalkIn> {
@@ -441,7 +408,6 @@ export async function createWalkIn(data: any): Promise<WalkIn> {
   return handleResponse<WalkIn>(response);
 }
 
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
 //current status of working 
 export async function updateAppointmentStatus(data: StatusUpdateRequest): Promise<any> {
   const response = await fetch(`${API_URL}/appointments/status`, {
@@ -459,22 +425,6 @@ export async function updateAppointmentStatus(data: StatusUpdateRequest): Promis
   return handleResponse(response);
 }
 
-<<<<<<< HEAD
-// Walk-in API calls
-export async function createWalkIn(data: any): Promise<WalkIn> {
-  const response = await fetch(`${API_URL}/walkins`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${localStorage.getItem('token')}`,
-    },
-    body: JSON.stringify(data),
-  });
-  return handleResponse<WalkIn>(response);
-}
-
-=======
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
 //current status of working 
 export async function updateWalkInStatus(data: StatusUpdateRequest): Promise<any> {
   console.log("Data received in updateWalkInStatus:", data);
@@ -496,31 +446,6 @@ export async function updateWalkInStatus(data: StatusUpdateRequest): Promise<any
   return handleResponse(response);
 }
 
-<<<<<<< HEAD
-export async function rejectAppointment(id: string, reason?: string): Promise<void> {
-  const token = localStorage.getItem('token');
-  
-  if (!token) {
-    throw new Error('Authentication required');
-  }
-  
-  const response = await fetch(`${API_URL}/appointments/reject`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({
-      appointmentId: id,
-      reason: reason || 'Appointment rejected by barber',
-    }),
-  });
-  
-  return handleResponse(response);
-}
-
-=======
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
 
 export async function getDashboard(barberId?: string, date?: string): Promise<DashboardResponse> {
   try {
@@ -557,25 +482,16 @@ export async function getDashboard(barberId?: string, date?: string): Promise<Da
     console.error("Error fetching dashboard:", error);
     throw error;
   }
-<<<<<<< HEAD
-}
-
-// Approve appointment (new function needed based on controller)
-export const approveAppointment = async (appointmentId: string): Promise<void> => {
-=======
 };
 
 //Approve appointment 
 export const approveAppointment = async (appointmentId: string, queueId?: string): Promise<void> => {
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
   const token = localStorage.getItem('token');
   
   if (!token) {
     throw new Error('Authentication required');
   }
   
-<<<<<<< HEAD
-=======
   const requestBody: any = {};
   
   // Add queue ID if provided (based on your controller expecting _id)
@@ -583,26 +499,19 @@ export const approveAppointment = async (appointmentId: string, queueId?: string
     requestBody._id = queueId;
   }
   
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
   const response = await fetch(`${API_URL}/appointments/${appointmentId}/approve`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
-<<<<<<< HEAD
-    }
-=======
     },
     body: JSON.stringify(requestBody)
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
   });
   
   await handleResponse(response);
 };
 
 
-<<<<<<< HEAD
-=======
 //reject appointment
 export const rejectAppointment = async (appointmentId: string, queueId?: string, reason?: string): Promise<void> => {
   const token = localStorage.getItem('token');
@@ -635,7 +544,6 @@ export const rejectAppointment = async (appointmentId: string, queueId?: string,
   return handleResponse(response);
 };
 
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
 
 // Get working hours with filters (admin can see all, barber sees only their own)
 export async function getWorkingHours(params?: { barberId?: string, date?: string, startDate?: string, endDate?: string }): Promise<WorkingHours[]> {
@@ -806,21 +714,12 @@ export async function deleteBlockedSlot(id: string): Promise<void> {
   return handleResponse<void>(response);
 }
 
-<<<<<<< HEAD
-
-
-// User profile API calls
-export async function getUserDetails(userId: string): Promise<User> {
-  const response = await fetch(`${API_URL}/users/${userId}`, {
-    headers: {
-=======
 // User profile API calls
 export async function getUserDetails(userId: string): Promise<User> {
   const response = await fetch(`${API_URL}/auth/profile/${userId}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
       'Authorization': `Bearer ${localStorage.getItem('token')}`,
     },
   });
@@ -828,11 +727,7 @@ export async function getUserDetails(userId: string): Promise<User> {
 }
 
 export async function updateUserProfile(userId: string, data: any): Promise<User> {
-<<<<<<< HEAD
-  const response = await fetch(`${API_URL}/users/${userId}`, {
-=======
   const response = await fetch(`${API_URL}/auth/profile/${userId}`, {
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -848,11 +743,7 @@ export async function changeUserPassword(
   currentPassword: string, 
   newPassword: string
 ): Promise<void> {
-<<<<<<< HEAD
-  const response = await fetch(`${API_URL}/users/${userId}/password`, {
-=======
   const response = await fetch(`${API_URL}/auth/profile/${userId}/password`, {
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',

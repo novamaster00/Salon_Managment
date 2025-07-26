@@ -25,12 +25,7 @@ exports.protect = asyncHandler(async (req, res, next) => {
 
     // Attach user to request
     req.user = await User.findById(decoded.id);
-<<<<<<< HEAD
-
-    console.log(req.user);
-=======
   
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
 
     // Check if user exists
     if (!req.user) {
@@ -85,9 +80,6 @@ exports.isBarberForResource = (model) => asyncHandler(async (req, res, next) => 
   }
 
   next();
-<<<<<<< HEAD
-});
-=======
 });
  
 exports.debugMiddleware = (req, res, next) => {
@@ -101,4 +93,3 @@ exports.debugMiddleware = (req, res, next) => {
   });
   next();
 };
->>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
