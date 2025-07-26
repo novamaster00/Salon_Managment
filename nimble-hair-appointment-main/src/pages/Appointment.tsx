@@ -39,8 +39,13 @@ const formSchema = z.object({
   date: z.date({
     required_error: 'Please select a date',
   }),
+<<<<<<< HEAD
   time: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, { 
     message: 'Please select a valid time in HH:MM format' 
+=======
+  time: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, {
+    message: 'Please select a valid time in HH:MM format'
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
   }),
 });
 
@@ -53,10 +58,21 @@ const SERVICES = [
 ];
 
 const TIME_SLOTS = [
+<<<<<<< HEAD
   '09:00', '09:30', '10:00', '10:30', '11:00', '11:30', 
   '12:00', '12:30', '13:00', '13:30', '14:00', '14:30',
   '15:00', '15:30', '16:00', '16:30', '17:00', '17:30',
   '18:00', '18:30', '19:00', '19:30',
+=======
+  '01:00', '1:30', '02:00', '02:30', '03:00', '03:30',
+  '04:00', '04:30', '05:00', '05:30', '06:00', '06:30',
+  '07:00', '07:30', '08:00', '08;30', '09:00', '09:30',
+  '10:00', '10:30', '11:00', '11:30', '12:00', '12:30',
+  '13:00', '13:30', '14:00', '14:30', '15:00', '15:30',
+  '16:00', '16:30', '17:00', '17:30', '18:00', '18:30',
+  '19:00', '19:30', '20:00', '20:30', '21:00', '21:30',
+  '22:00', '22:30', '23:00', '23:00', '23:30', '24:00'
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
 ];
 
 export default function AppointmentPage() {
@@ -99,18 +115,30 @@ export default function AppointmentPage() {
     try {
       setIsChecking(true);
       setCheckedAppointment(null);
+<<<<<<< HEAD
       
       const formattedDate = format(values.date, 'yyyy-MM-dd');
       
+=======
+
+      const formattedDate = format(values.date, 'yyyy-MM-dd');
+
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
       const response = await checkAvailability({
         barberId: values.barberId,
         date: formattedDate,
         requestedTime: values.time,
         service: values.service
       });
+<<<<<<< HEAD
       
       setCheckedAppointment(response);
       
+=======
+
+      setCheckedAppointment(response);
+
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
       toast({
         title: 'Slot Available',
         description: 'This time slot is available. You can now book your appointment.',
@@ -138,10 +166,17 @@ export default function AppointmentPage() {
 
     try {
       setIsBooking(true);
+<<<<<<< HEAD
       
       const values = form.getValues();
       const formattedDate = format(values.date, 'yyyy-MM-dd');
       
+=======
+
+      const values = form.getValues();
+      const formattedDate = format(values.date, 'yyyy-MM-dd');
+
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
       const response = await createAppointment({
         name: values.name,
         phoneNumber: values.phoneNumber,
@@ -151,12 +186,20 @@ export default function AppointmentPage() {
         date: formattedDate,
         requestedTime: values.time,
       });
+<<<<<<< HEAD
       
+=======
+
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
       toast({
         title: 'Appointment Booked',
         description: `Your appointment has been successfully booked. Your token number is ${response.tokenNumber || 'N/A'}.`,
       });
+<<<<<<< HEAD
       
+=======
+
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
       // Reset form and state
       form.reset();
       setCheckedAppointment(null);
@@ -175,7 +218,11 @@ export default function AppointmentPage() {
     <Layout>
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold mb-8 text-center">Book an Appointment</h1>
+<<<<<<< HEAD
         
+=======
+
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
         <div className="bg-white p-6 rounded-lg shadow-md">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleCheck)} className="space-y-6">
@@ -192,7 +239,11 @@ export default function AppointmentPage() {
                   </FormItem>
                 )}
               />
+<<<<<<< HEAD
               
+=======
+
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField
                   control={form.control}
@@ -207,7 +258,11 @@ export default function AppointmentPage() {
                     </FormItem>
                   )}
                 />
+<<<<<<< HEAD
                 
+=======
+
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
                 <FormField
                   control={form.control}
                   name="email"
@@ -222,7 +277,11 @@ export default function AppointmentPage() {
                   )}
                 />
               </div>
+<<<<<<< HEAD
               
+=======
+
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField
                   control={form.control}
@@ -230,8 +289,13 @@ export default function AppointmentPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Barber</FormLabel>
+<<<<<<< HEAD
                       <Select 
                         onValueChange={field.onChange} 
+=======
+                      <Select
+                        onValueChange={field.onChange}
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
                         defaultValue={field.value}
                       >
                         <FormControl>
@@ -251,15 +315,24 @@ export default function AppointmentPage() {
                     </FormItem>
                   )}
                 />
+<<<<<<< HEAD
                 
+=======
+
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
                 <FormField
                   control={form.control}
                   name="service"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Service</FormLabel>
+<<<<<<< HEAD
                       <Select 
                         onValueChange={field.onChange} 
+=======
+                      <Select
+                        onValueChange={field.onChange}
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
                         defaultValue={field.value}
                       >
                         <FormControl>
@@ -280,7 +353,11 @@ export default function AppointmentPage() {
                   )}
                 />
               </div>
+<<<<<<< HEAD
               
+=======
+
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField
                   control={form.control}
@@ -313,9 +390,21 @@ export default function AppointmentPage() {
                             selected={field.value}
                             onSelect={field.onChange}
                             disabled={(date) => {
+<<<<<<< HEAD
                               // Disable past dates and Sundays (assuming Sunday = 0)
                               return date < new Date(new Date().setHours(0, 0, 0, 0)) || 
                                      date.getDay() === 0;
+=======
+                              const today = new Date();
+                              today.setHours(0, 0, 0, 0); // Set time to midnight so the date comparison works properly
+
+                              const sixDaysFromNow = new Date();
+                              sixDaysFromNow.setDate(today.getDate() + 6);
+                              sixDaysFromNow.setHours(23, 59, 59, 999); // Set time to the end of the day
+
+                              // Disable dates before today and beyond 6 days from today
+                              return date < today || date > sixDaysFromNow;
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
                             }}
                             initialFocus
                             className={cn("p-3 pointer-events-auto")}
@@ -326,15 +415,24 @@ export default function AppointmentPage() {
                     </FormItem>
                   )}
                 />
+<<<<<<< HEAD
                 
+=======
+
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
                 <FormField
                   control={form.control}
                   name="time"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Time</FormLabel>
+<<<<<<< HEAD
                       <Select 
                         onValueChange={field.onChange} 
+=======
+                      <Select
+                        onValueChange={field.onChange}
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
                         defaultValue={field.value}
                       >
                         <FormControl>
@@ -355,18 +453,31 @@ export default function AppointmentPage() {
                   )}
                 />
               </div>
+<<<<<<< HEAD
               
               <div className="flex flex-col sm:flex-row justify-between gap-4">
                 <Button 
                   type="submit" 
+=======
+
+              <div className="flex flex-col sm:flex-row justify-between gap-4">
+                <Button
+                  type="submit"
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
                   className="bg-barbershop-navy hover:bg-barbershop-navy/90"
                   disabled={isChecking}
                 >
                   {isChecking ? 'Checking...' : 'Check Availability'}
                 </Button>
+<<<<<<< HEAD
                 
                 <Button 
                   type="button" 
+=======
+
+                <Button
+                  type="button"
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
                   className="bg-barbershop-gold text-barbershop-navy hover:bg-barbershop-gold/90"
                   disabled={!checkedAppointment || isBooking}
                   onClick={handleBook}
@@ -376,7 +487,11 @@ export default function AppointmentPage() {
               </div>
             </form>
           </Form>
+<<<<<<< HEAD
           
+=======
+
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
           {checkedAppointment && (
             <div className="mt-6 p-4 border border-green-200 bg-green-50 rounded-md">
               <div className="flex items-start">

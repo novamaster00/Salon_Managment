@@ -49,7 +49,11 @@ export default function QueuePage() {
     // Only fetch queue if we have a selected barber
     if (selectedBarber) {
       fetchQueue();
+<<<<<<< HEAD
       
+=======
+
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
       // Refresh queue every 30 seconds
       const intervalId = setInterval(fetchQueue, 30000);
       return () => clearInterval(intervalId);
@@ -60,7 +64,11 @@ export default function QueuePage() {
     try {
       const data = await getAllBarbers();
       setBarbers(data);
+<<<<<<< HEAD
       
+=======
+
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
       // Set the first barber as default if available
       if (data.length > 0) {
         setSelectedBarber(data[0]._id);
@@ -76,12 +84,20 @@ export default function QueuePage() {
 
   async function fetchQueue() {
     if (!selectedBarber) return;
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
     setIsLoading(true);
     try {
       // Format the date as YYYY-MM-DD
       const formattedDate = format(date, 'yyyy-MM-dd');
+<<<<<<< HEAD
       
+=======
+
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
       const data = await getWaitingQueue(selectedBarber, formattedDate);
       setQueue(data);
     } catch (error) {
@@ -98,7 +114,11 @@ export default function QueuePage() {
   function formatTime(timeString: string) {
     // Handle different time formats
     if (!timeString) return 'N/A';
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
     // Check if the timeString is just hours and minutes (HH:MM)
     if (timeString.length === 5 && timeString.includes(':')) {
       // Create a date object with today's date and the time
@@ -107,7 +127,11 @@ export default function QueuePage() {
       today.setHours(hours, minutes, 0, 0);
       return today.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
     // If it's an ISO string, parse it normally
     try {
       const date = new Date(timeString);
@@ -141,7 +165,11 @@ export default function QueuePage() {
       'cancelled': 'cancelled',
       'pending_approval': 'pending_approval'
     };
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
     return statusMap[status] || 'waiting'; // Default to 'waiting' if status is unknown
   }
 
@@ -152,6 +180,7 @@ export default function QueuePage() {
       // TypeScript doesn't know about this property, but it exists in the actual data
       return (entry.sourceData as any).customerName;
     }
+<<<<<<< HEAD
     
     if (entry.sourceData?.customerId?.name) {
       return entry.sourceData.customerId.name;
@@ -164,17 +193,39 @@ export default function QueuePage() {
     return 'N/A';
   }
   
+=======
+
+    if (entry.sourceData?.customerId?.name) {
+      return entry.sourceData.customerId.name;
+    }
+
+    if (entry.sourceData?.customerName) {
+      return entry.sourceData.customerName;
+    }
+
+    return 'N/A';
+  }
+
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
   // Helper to get service from entry
   function getService(entry: QueueEntry): string {
     // Check all possible paths for the service
     if (entry.service) {
       return entry.service;
     }
+<<<<<<< HEAD
     
     if (entry.sourceData?.service) {
       return entry.sourceData.service;
     }
     
+=======
+
+    if (entry.sourceData?.service) {
+      return entry.sourceData.service;
+    }
+
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
     return 'N/A';
   }
 
@@ -182,7 +233,11 @@ export default function QueuePage() {
     <Layout>
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold mb-8 text-center">Current Queue</h1>
+<<<<<<< HEAD
         
+=======
+
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
         <div className="mb-6 flex flex-col md:flex-row gap-4 justify-center">
           {/* Barber Selection */}
           <div className="w-full md:w-64">
@@ -203,7 +258,11 @@ export default function QueuePage() {
               </SelectContent>
             </Select>
           </div>
+<<<<<<< HEAD
           
+=======
+
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
           {/* Date Selection */}
           <div className="w-full md:w-64">
             <Popover>
@@ -222,17 +281,37 @@ export default function QueuePage() {
                   selected={date}
                   onSelect={(newDate) => newDate && setDate(newDate)}
                   initialFocus
+<<<<<<< HEAD
+=======
+                  disabled={(date) => {
+                    // Disable past dates
+                    const today = new Date();
+                    const twoDaysFromNow = new Date();
+                    twoDaysFromNow.setDate(today.getDate() + 2);
+
+                    return date < today || date > twoDaysFromNow;
+                  }}
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
                 />
               </PopoverContent>
             </Popover>
           </div>
         </div>
+<<<<<<< HEAD
         
         <Card>
           <CardHeader className="bg-barbershop-navy text-white">
             <CardTitle className="text-xl">
               {selectedBarber ? 
                 `${getBarberNameById(selectedBarber)}'s Queue - ${format(date, 'MMM dd, yyyy')}` : 
+=======
+
+        <Card>
+          <CardHeader className="bg-barbershop-navy text-white">
+            <CardTitle className="text-xl">
+              {selectedBarber ?
+                `${getBarberNameById(selectedBarber)}'s Queue - ${format(date, 'MMM dd, yyyy')}` :
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
                 "Today's Waiting Queue"}
             </CardTitle>
           </CardHeader>
@@ -281,7 +360,11 @@ export default function QueuePage() {
             )}
           </CardContent>
         </Card>
+<<<<<<< HEAD
         
+=======
+
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
         <div className="mt-8 text-center text-gray-500 text-sm">
           <p>This queue updates automatically every 30 seconds.</p>
           <p>If your status changes to "In Progress", please proceed to your assigned barber.</p>

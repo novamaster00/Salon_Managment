@@ -110,6 +110,14 @@ export default function Login() {
                     <Input type="password" placeholder="••••••••" {...field} />
                   </FormControl>
                   <FormMessage />
+<<<<<<< HEAD
+=======
+                  <div className="text-right mt-1">
+                    <Link to="/forgot-password" className="text-sm text-barbershop-navy hover:underline">
+                      Forgot password?
+                    </Link>
+                  </div>
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
                 </FormItem>
               )}
             />

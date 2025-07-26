@@ -157,7 +157,15 @@ exports.getWorkingHoursById = asyncHandler(async (req, res, next) => {
     select: 'name'
   });
 
+<<<<<<< HEAD
   if (!workingHours || workingHours.length === 0) {
+=======
+  if(!workingHours.length === 0)
+  {
+    return next(new ErrorResponse(`please add working hours ${req.user._id}`, 201));
+  }
+  if (!workingHours) {
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
     return next(new ErrorResponse(`Working hours not found for user ${req.user._id}`, 404));
   }
 

@@ -1,6 +1,15 @@
 const WorkingHours = require('../models/WorkingHours');
+<<<<<<< HEAD
 const { compareTimeStrings, addMinutesToTime } = require('../utils/dateUtils');
 const { isTimeSlotAvailable } = require('../services/findAvailableTimeSlot');
+=======
+const AtomicReservationService = require('../services/atomicReservationService');
+const { compareTimeStrings, addMinutesToTime } = require('../utils/dateUtils');
+const { isTimeSlotAvailable } = require('../services/findAvailableTimeSlot');
+const calculateEndTime = (startTime, duration) => {
+  return addMinutesToTime(startTime, duration);
+};
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
 
 // Service durations in minutes
 const SERVICE_DURATIONS = {
@@ -88,7 +97,11 @@ const checkSlotAvailability = async (req, res) => {
 
     // Calculate parameters for isTimeSlotAvailable function
     const startTime = requestedTime;
+<<<<<<< HEAD
     
+=======
+    const serviceKey = service.toLowerCase().replace(/\s+/g, '-');
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
     // Get service duration and calculate end time
     const serviceDuration = SERVICE_DURATIONS[service];
     const endTime = addMinutesToTime(startTime, serviceDuration);
@@ -104,6 +117,7 @@ const checkSlotAvailability = async (req, res) => {
     // Use the existing isTimeSlotAvailable function to check availability
     const isAvailable = await isTimeSlotAvailable(barberId, date, startTime, endTime);
     
+<<<<<<< HEAD
     if (isAvailable) {
       return res.status(200).json({
         available: true,
@@ -120,6 +134,45 @@ const checkSlotAvailability = async (req, res) => {
         message: 'The requested time slot is not available'
       });
     }
+=======
+    if (!isAvailable) {
+  return res.status(200).json({
+    available: false,
+    message: 'The requested time slot is already taken'
+  });
+}
+
+// Atomically reserve the slot
+const reservation = await AtomicReservationService.reserveTimeSlot(
+  barberId,
+  date,
+  startTime,
+  endTime,
+  'appointment', // reservation type (uppercase)
+  req.user.email
+);
+
+if (!reservation.success) {
+  return res.status(200).json({
+    available: false,
+    message: reservation.message || 'Failed to reserve the time slot'
+  });
+}
+
+// Return success response with confirmed slot
+return res.status(200).json({
+  available: true,
+  message: 'Time slot is available and reserved',
+  slot: {
+    start: startTime,
+    end: endTime,
+    duration: serviceDuration,
+    date,
+    barberId,
+    service
+  }
+});
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
   } catch (error) {
     console.error('Error checking slot availability:', error);
     return res.status(500).json({ 

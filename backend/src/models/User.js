@@ -51,7 +51,20 @@ const UserSchema = new mongoose.Schema({
   updatedAt: {
     type: Date,
     default: Date.now
+<<<<<<< HEAD
   }
+=======
+  },
+  isVerified: {
+    type: Boolean,
+    default: false
+  },
+  verifyToken: String,
+  
+  // ADD THESE FIELDS FOR PASSWORD RESET
+  resetPasswordToken: String,
+  resetPasswordExpires: Date
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
 });
 
 // Hash password before saving

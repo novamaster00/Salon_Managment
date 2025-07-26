@@ -19,24 +19,55 @@ import { register as apiRegister } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import Layout from '@/components/Layout';
 
+<<<<<<< HEAD
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters' }),
   email: z.string().email({ message: 'Please enter a valid email address' }),
   password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
   confirmPassword: z.string(),
   role: z.enum(['customer', 'barber', 'admin'], { 
+=======
+
+const formSchema = z.object({
+  name: z.string().min(2, { message: 'Name must be at least 2 characters' }),
+
+  email: z.string()
+    .email({ message: 'Please enter a valid email address' }),
+    // .refine((val) => val.endsWith('@gmail.com'), {
+    //   message: 'Email must be a Gmail address',
+    // }),
+
+  phone: z.string()
+    .regex(/^\d{10}$/, { message: 'Phone number must be exactly 10 digits' }),
+
+  password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
+
+  confirmPassword: z.string(),
+
+  role: z.enum(['customer', 'barber', 'admin'], {
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
     required_error: 'Please select a role'
   })
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
+<<<<<<< HEAD
   path: ["confirmPassword"],
 });
+=======
+  path: ['confirmPassword'],
+})
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
 
 export default function Register() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { login: authLogin } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+<<<<<<< HEAD
+=======
+  const [isRegistered, setIsRegistered] = useState(false);
+  const [userEmail, setUserEmail] = useState('');
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -45,6 +76,10 @@ export default function Register() {
       email: '',
       password: '',
       confirmPassword: '',
+<<<<<<< HEAD
+=======
+      phone:'',
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
       role: 'customer'
     },
   });
@@ -56,6 +91,7 @@ export default function Register() {
         values.email, 
         values.password, 
         values.role,
+<<<<<<< HEAD
         values.name
       );
       
@@ -73,6 +109,31 @@ export default function Register() {
         navigate('/');
       }
     } catch (error) {
+=======
+        values.name,
+        values.phone,
+      );
+      
+      setUserEmail(values.email);
+      setIsRegistered(true);
+
+      //authLogin(response.token, response.user);
+      
+      toast({
+        title: 'Registration successful!',
+        description: 'Please check your email to verify your account before logging in.',
+        duration: 6000,
+      });
+      
+      // // Redirect based on role
+      // if (values.role === 'admin' || values.role === 'barber') {
+      //   navigate('/dashboard');
+      // } else {  
+      //   navigate('/');
+      // }
+    } catch (error) {
+      console.error('Registration error, error');
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
       toast({
         title: 'Registration failed',
         description: error instanceof Error ? error.message : 'An error occurred during registration',
@@ -83,6 +144,65 @@ export default function Register() {
     }
   }
 
+<<<<<<< HEAD
+=======
+
+  if (isRegistered) {
+    return (
+      <Layout>
+        <div className="max-w-md mx-auto text-center">
+          <div className="bg-white p-8 rounded-xl shadow-lg border">
+            <div className="mb-6">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+              </div>
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">Check Your Email!</h1>
+              <p className="text-gray-600 mb-4">
+                We've sent a verification link to <strong>{userEmail}</strong>
+              </p>
+            </div>
+            
+            <div className="bg-blue-50 p-4 rounded-lg mb-6 border border-blue-200">
+              <h3 className="font-semibold text-blue-900 mb-2">Next Steps:</h3>
+              <ol className="text-sm text-blue-800 text-left space-y-1">
+                <li>1. Check your email inbox</li>
+                <li>2. Click the verification link</li>
+                <li>3. Return here to log in</li>
+              </ol>
+            </div>
+            
+            <div className="space-y-3">
+              <Button 
+                onClick={() => navigate('/login')} 
+                className="w-full bg-barbershop-gold text-barbershop-navy hover:bg-barbershop-gold/90"
+              >
+                Proceed to Login
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setIsRegistered(false);
+                  form.reset();
+                }}
+                className="w-full"
+              >
+                Register Another Account
+              </Button>
+            </div>
+            
+            <div className="mt-6 text-sm text-gray-500">
+              <p>Didn't receive the email? Check your spam folder or contact support.</p>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+  
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
   return (
     <Layout>
       <div className="max-w-md mx-auto">
@@ -117,6 +237,23 @@ export default function Register() {
                 </FormItem>
               )}
             />
+<<<<<<< HEAD
+=======
+
+            <FormField
+              control={form.control}
+              name="phone"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>phone</FormLabel>
+                  <FormControl>
+                    <Input placeholder="81115564897" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
             
             <FormField
               control={form.control}
@@ -204,4 +341,9 @@ export default function Register() {
       </div>
     </Layout>
   );
+<<<<<<< HEAD
 }
+=======
+ }
+
+>>>>>>> 0011b2f (trying to add into Production ready code to Production Branch)
