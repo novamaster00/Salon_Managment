@@ -19,6 +19,7 @@ let redisConnected = false;
 
 const testRedisConnection = async () => {
   try {
+    console.log("REDIS_URL:", process.env.REDIS_URL || "❌ Not Set");
     const testQueue = new Bull('test-connection', {
       redis: process.env.REDIS_URL || {
         host: emailConfig.queue.redis.host,

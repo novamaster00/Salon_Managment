@@ -20,8 +20,14 @@ import {
   ValidateTokenResponse
 } from './types';
 
-const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000/api';
+const API_URL = import.meta.env.VITE_BACKEND_URL;
+try{
 console.log("API_URL",import.meta.env.VITE_BACKEND_URL);
+}catch(Error )
+{
+  console.log(Error);
+}
+
 
 // Helper function to handle API responses
 export async function handleResponse<T>(response: Response): Promise<T> {
