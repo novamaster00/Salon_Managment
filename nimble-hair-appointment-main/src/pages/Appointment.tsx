@@ -1,10 +1,9 @@
-
 import { useState, useEffect } from 'react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns';
-import { CalendarIcon, CheckIcon } from 'lucide-react';
+import { CalendarIcon, CheckIcon, User, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -53,18 +52,99 @@ const SERVICES = [
 ];
 
 const TIME_SLOTS = [
-  '01:00', '1:30', '02:00', '02:30', '03:00', '03:30',
+  '01:00', '01:30', '02:00', '02:30', '03:00', '03:30',
   '04:00', '04:30', '05:00', '05:30', '06:00', '06:30',
-  '07:00', '07:30', '08:00', '08;30', '09:00', '09:30',
+  '07:00', '07:30', '08:00', '08:30', '09:00', '09:30',
   '10:00', '10:30', '11:00', '11:30', '12:00', '12:30',
   '13:00', '13:30', '14:00', '14:30', '15:00', '15:30',
   '16:00', '16:30', '17:00', '17:30', '18:00', '18:30',
   '19:00', '19:30', '20:00', '20:30', '21:00', '21:30',
-  '22:00', '22:30', '23:00', '23:00', '23:30', '24:00'
+  '22:00', '22:30', '23:00', '23:30', '24:00'
 ];
+
+// Mock authentication check - replace with your actual auth logic
+const useAuth = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState(null);
+  
+  // Simulate checking authentication status
+  useEffect(() => {
+    // Replace this with your actual authentication check
+    const checkAuth = () => {
+      const token = localStorage.getItem('authToken');
+      const userData = localStorage.getItem('userData');
+      
+      if (token && userData) {
+        setIsAuthenticated(true);
+        setUser(JSON.parse(userData));
+      }
+    };
+    
+    checkAuth();
+  }, []);
+  
+  return { isAuthenticated, user };
+};
+
+const AccountRequiredNotice = () => (
+  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6 mb-6">
+    <div className="flex items-start space-x-3">
+      <div className="flex-shrink-0">
+        <div className="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-full">
+          <User className="w-5 h-5 text-blue-600" />
+        </div>
+      </div>
+      <div className="flex-1">
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          Account Required
+        </h3>
+        <p className="text-gray-700 mb-4">
+          To ensure the best service and maintain appointment records, please sign in to your account 
+          or create one to book appointments with our professional barbers.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Button 
+            className="bg-blue-600 hover:bg-blue-700 text-white"
+            onClick={() => {
+              // Replace with your actual sign in logic
+              window.location.href = '/login';
+            }}
+          >
+            Sign In
+          </Button>
+          <Button 
+            variant="outline" 
+            className="border-blue-300 text-blue-700 hover:bg-blue-50"
+            onClick={() => {
+              // Replace with your actual sign up logic
+              window.location.href = '/register';
+            }}
+          >
+            Create Account
+          </Button>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+const DisabledFormOverlay = () => (
+  <div className="absolute inset-0 bg-gray-100/80 backdrop-blur-sm rounded-lg flex items-center justify-center z-10">
+    <div className="text-center p-6 bg-white rounded-lg shadow-lg border max-w-sm mx-4">
+      <Lock className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+        Sign In Required
+      </h3>
+      <p className="text-gray-600 text-sm">
+        Please sign in to your account to access the appointment booking form.
+      </p>
+    </div>
+  </div>
+);
 
 export default function AppointmentPage() {
   const { toast } = useToast();
+  const { isAuthenticated, user } = useAuth();
   const [barbers, setBarbers] = useState<Barber[]>([]);
   const [isChecking, setIsChecking] = useState(false);
   const [isBooking, setIsBooking] = useState(false);
@@ -83,6 +163,15 @@ export default function AppointmentPage() {
   });
 
   useEffect(() => {
+    // Pre-fill form with user data if authenticated
+    if (isAuthenticated && user) {
+      form.setValue('name', user.name || '');
+      form.setValue('email', user.email || '');
+      form.setValue('phoneNumber', user.phoneNumber || '');
+    }
+  }, [isAuthenticated, user, form]);
+
+  useEffect(() => {
     async function fetchBarbers() {
       try {
         const data = await getAllBarbers();
@@ -96,10 +185,22 @@ export default function AppointmentPage() {
       }
     }
 
-    fetchBarbers();
-  }, [toast]);
+    // Only fetch barbers if user is authenticated
+    if (isAuthenticated) {
+      fetchBarbers();
+    }
+  }, [toast, isAuthenticated]);
 
   async function handleCheck(values: z.infer<typeof formSchema>) {
+    if (!isAuthenticated) {
+      toast({
+        title: 'Authentication Required',
+        description: 'Please sign in to check appointment availability.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     try {
       setIsChecking(true);
       setCheckedAppointment(null);
@@ -131,6 +232,15 @@ export default function AppointmentPage() {
   }
 
   async function handleBook() {
+    if (!isAuthenticated) {
+      toast({
+        title: 'Authentication Required',
+        description: 'Please sign in to book an appointment.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     if (!checkedAppointment) {
       toast({
         title: 'Error',
@@ -164,6 +274,13 @@ export default function AppointmentPage() {
       // Reset form and state
       form.reset();
       setCheckedAppointment(null);
+      
+      // Re-fill user data
+      if (user) {
+        form.setValue('name', user.name || '');
+        form.setValue('email', user.email || '');
+        form.setValue('phoneNumber', user.phoneNumber || '');
+      }
     } catch (error) {
       toast({
         title: 'Booking Failed',
@@ -180,7 +297,11 @@ export default function AppointmentPage() {
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold mb-8 text-center">Book an Appointment</h1>
 
-        <div className="bg-white p-6 rounded-lg shadow-md">
+        {!isAuthenticated && <AccountRequiredNotice />}
+
+        <div className="bg-white p-6 rounded-lg shadow-md relative">
+          {!isAuthenticated && <DisabledFormOverlay />}
+          
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleCheck)} className="space-y-6">
               <FormField
@@ -190,7 +311,11 @@ export default function AppointmentPage() {
                   <FormItem>
                     <FormLabel>Full Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="John Doe" {...field} />
+                      <Input 
+                        placeholder="John Doe" 
+                        {...field} 
+                        disabled={!isAuthenticated}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -205,7 +330,11 @@ export default function AppointmentPage() {
                     <FormItem>
                       <FormLabel>Phone Number</FormLabel>
                       <FormControl>
-                        <Input placeholder="(555) 123-4567" {...field} />
+                        <Input 
+                          placeholder="(555) 123-4567" 
+                          {...field} 
+                          disabled={!isAuthenticated}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -219,7 +348,11 @@ export default function AppointmentPage() {
                     <FormItem>
                       <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <Input placeholder="your.email@example.com" {...field} />
+                        <Input 
+                          placeholder="your.email@example.com" 
+                          {...field} 
+                          disabled={!isAuthenticated}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -237,6 +370,7 @@ export default function AppointmentPage() {
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
+                        disabled={!isAuthenticated}
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -265,6 +399,7 @@ export default function AppointmentPage() {
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
+                        disabled={!isAuthenticated}
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -301,6 +436,7 @@ export default function AppointmentPage() {
                                 "w-full pl-3 text-left font-normal",
                                 !field.value && "text-muted-foreground"
                               )}
+                              disabled={!isAuthenticated}
                             >
                               {field.value ? (
                                 format(field.value, "PPP")
@@ -317,14 +453,15 @@ export default function AppointmentPage() {
                             selected={field.value}
                             onSelect={field.onChange}
                             disabled={(date) => {
+                              if (!isAuthenticated) return true;
+                              
                               const today = new Date();
-                              today.setHours(0, 0, 0, 0); // Set time to midnight so the date comparison works properly
+                              today.setHours(0, 0, 0, 0);
 
                               const sixDaysFromNow = new Date();
                               sixDaysFromNow.setDate(today.getDate() + 6);
-                              sixDaysFromNow.setHours(23, 59, 59, 999); // Set time to the end of the day
+                              sixDaysFromNow.setHours(23, 59, 59, 999);
 
-                              // Disable dates before today and beyond 6 days from today
                               return date < today || date > sixDaysFromNow;
                             }}
                             initialFocus
@@ -346,6 +483,7 @@ export default function AppointmentPage() {
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
+                        disabled={!isAuthenticated}
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -370,7 +508,7 @@ export default function AppointmentPage() {
                 <Button
                   type="submit"
                   className="bg-barbershop-navy hover:bg-barbershop-navy/90"
-                  disabled={isChecking}
+                  disabled={isChecking || !isAuthenticated}
                 >
                   {isChecking ? 'Checking...' : 'Check Availability'}
                 </Button>
@@ -378,7 +516,7 @@ export default function AppointmentPage() {
                 <Button
                   type="button"
                   className="bg-barbershop-gold text-barbershop-navy hover:bg-barbershop-gold/90"
-                  disabled={!checkedAppointment || isBooking}
+                  disabled={!checkedAppointment || isBooking || !isAuthenticated}
                   onClick={handleBook}
                 >
                   {isBooking ? 'Booking...' : 'Book Appointment'}
@@ -387,7 +525,7 @@ export default function AppointmentPage() {
             </form>
           </Form>
 
-          {checkedAppointment && (
+          {checkedAppointment && isAuthenticated && (
             <div className="mt-6 p-4 border border-green-200 bg-green-50 rounded-md">
               <div className="flex items-start">
                 <CheckIcon className="h-5 w-5 text-green-500 mt-0.5 mr-2" />
