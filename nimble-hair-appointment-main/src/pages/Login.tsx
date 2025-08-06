@@ -17,7 +17,8 @@ import { useToast } from '@/hooks/use-toast';
 import { login } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import Layout from '@/components/Layout';
-import { User } from '@/lib/types'; // Make sure to import User type
+import { User } from '@/lib/types';
+import { Eye, EyeOff } from 'lucide-react'; // Import eye icons
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email address' }),
@@ -30,6 +31,7 @@ export default function Login() {
   const { toast } = useToast();
   const { login: authLogin } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); // Add state for password visibility
   
   const from = (location.state as any)?.from?.pathname || '/';
 
@@ -44,12 +46,11 @@ export default function Login() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setIsLoading(true);
-      console.log('Submitting login with values:', values); // Debug log
+      console.log('Submitting login with values:', values);
       
       const response = await login(values.email, values.password);
-      console.log('Login response:', response); // Debug log
+      console.log('Login response:', response);
       
-      // Check if response has the expected structure
       if (!response || !response.token || !response.user) {
         throw new Error('Invalid response from server');
       }
@@ -61,14 +62,13 @@ export default function Login() {
         description: `Welcome back${response.user.name ? `, ${response.user.name}` : ''}!`,
       });
       
-      // Redirect based on user role from response
       if (response.user.role === 'admin' || response.user.role === 'barber') {
         navigate('/dashboard');
       } else {
         navigate(from);
       }
     } catch (error) {
-      console.error('Login error:', error); // Debug log
+      console.error('Login error:', error);
       toast({
         title: 'Login failed',
         description: error instanceof Error ? error.message : 'An error occurred during login',
@@ -107,7 +107,25 @@ export default function Login() {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="••••••••" {...field} />
+                    <div className="relative">
+                      <Input 
+                        type={showPassword ? "text" : "password"} 
+                        placeholder="••••••••" 
+                        {...field} 
+                        className="pr-10"
+                      />
+                      <button
+                        type="button"
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                        ) : (
+                          <Eye className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                        )}
+                      </button>
+                    </div>
                   </FormControl>
                   <FormMessage />
                   <div className="text-right mt-1">

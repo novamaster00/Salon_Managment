@@ -11,6 +11,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -18,21 +19,24 @@ import { useToast } from '@/hooks/use-toast';
 import { register as apiRegister } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import Layout from '@/components/Layout';
-
+import { Eye, EyeOff } from 'lucide-react';
 
 const formSchema = z.object({
-  name: z.string().min(2, { message: 'Name must be at least 2 characters' }),
+  name: z.string()
+    .min(2, { message: 'Name must be at least 2 characters' })
+    .regex(/^[a-zA-Z\s]+$/, { message: 'Name can only contain letters and spaces' }),
 
   email: z.string()
     .email({ message: 'Please enter a valid email address' }),
-    // .refine((val) => val.endsWith('@gmail.com'), {
-    //   message: 'Email must be a Gmail address',
-    // }),
 
   phone: z.string()
     .regex(/^\d{10}$/, { message: 'Phone number must be exactly 10 digits' }),
 
-  password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
+  password: z.string()
+    .min(6, { message: 'Password must be at least 6 characters' })
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, { 
+      message: 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character' 
+    }),
 
   confirmPassword: z.string(),
 
@@ -42,7 +46,7 @@ const formSchema = z.object({
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ['confirmPassword'],
-})
+});
 
 export default function Register() {
   const navigate = useNavigate();
@@ -51,6 +55,8 @@ export default function Register() {
   const [isLoading, setIsLoading] = useState(false);
   const [isRegistered, setIsRegistered] = useState(false);
   const [userEmail, setUserEmail] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -63,6 +69,24 @@ export default function Register() {
       role: 'customer'
     },
   });
+
+  // Handle input filtering for name field
+  const handleNameInput = (e) => {
+    const value = e.target.value;
+    // Allow only letters and spaces
+    const filteredValue = value.replace(/[^a-zA-Z\s]/g, '');
+    e.target.value = filteredValue;
+    return filteredValue;
+  };
+
+  // Handle input filtering for phone field
+  const handlePhoneInput = (e) => {
+    const value = e.target.value;
+    // Allow only digits and limit to 10
+    const filteredValue = value.replace(/[^\d]/g, '').slice(0, 10);
+    e.target.value = filteredValue;
+    return filteredValue;
+  };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
@@ -77,23 +101,14 @@ export default function Register() {
       
       setUserEmail(values.email);
       setIsRegistered(true);
-
-      //authLogin(response.token, response.user);
       
       toast({
         title: 'Registration successful!',
         description: 'Please check your email to verify your account before logging in.',
         duration: 6000,
       });
-      
-      // // Redirect based on role
-      // if (values.role === 'admin' || values.role === 'barber') {
-      //   navigate('/dashboard');
-      // } else {  
-      //   navigate('/');
-      // }
     } catch (error) {
-      console.error('Registration error, error');
+      console.error('Registration error:', error);
       toast({
         title: 'Registration failed',
         description: error instanceof Error ? error.message : 'An error occurred during registration',
@@ -103,7 +118,6 @@ export default function Register() {
       setIsLoading(false);
     }
   }
-
 
   if (isRegistered) {
     return (
@@ -172,10 +186,20 @@ export default function Register() {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>Full Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="John Doe" {...field} />
+                    <Input 
+                      placeholder="KRUNAL VALAND" 
+                      {...field} 
+                      onInput={(e) => {
+                        const filteredValue = handleNameInput(e);
+                        field.onChange(filteredValue);
+                      }}
+                    />
                   </FormControl>
+                  <FormDescription className="text-xs text-gray-500">
+                    Only letters and spaces are allowed
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -200,10 +224,21 @@ export default function Register() {
               name="phone"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>phone</FormLabel>
+                  <FormLabel>Phone</FormLabel>
                   <FormControl>
-                    <Input placeholder="81115564897" {...field} />
+                    <Input 
+                      placeholder="1234567890" 
+                      {...field} 
+                      onInput={(e) => {
+                        const filteredValue = handlePhoneInput(e);
+                        field.onChange(filteredValue);
+                      }}
+                      maxLength={10}
+                    />
                   </FormControl>
+                  <FormDescription className="text-xs text-gray-500">
+                    Enter exactly 10 digits (numbers only)
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -216,8 +251,35 @@ export default function Register() {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="••••••••" {...field} />
+                    <div className="relative">
+                      <Input 
+                        type={showPassword ? "text" : "password"} 
+                        placeholder="••••••••" 
+                        {...field} 
+                        className="pr-10"
+                      />
+                      <button
+                        type="button"
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                        ) : (
+                          <Eye className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                        )}
+                      </button>
+                    </div>
                   </FormControl>
+                  <FormDescription className="text-xs text-gray-500">
+                    Password must be at least 6 characters and include:
+                    <ul className="list-disc list-inside mt-1 space-y-1">
+                      <li>At least one uppercase letter (A-Z)</li>
+                      <li>At least one lowercase letter (a-z)</li>
+                      <li>At least one number (0-9)</li>
+                      <li>At least one special character (@$!%*?&)</li>
+                    </ul>
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -230,8 +292,29 @@ export default function Register() {
                 <FormItem>
                   <FormLabel>Confirm Password</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="••••••••" {...field} />
+                    <div className="relative">
+                      <Input 
+                        type={showConfirmPassword ? "text" : "password"} 
+                        placeholder="••••••••" 
+                        {...field} 
+                        className="pr-10"
+                      />
+                      <button
+                        type="button"
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      >
+                        {showConfirmPassword ? (
+                          <EyeOff className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                        ) : (
+                          <Eye className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                        )}
+                      </button>
+                    </div>
                   </FormControl>
+                  <FormDescription className="text-xs text-gray-500">
+                    Please re-enter your password to confirm
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -255,7 +338,7 @@ export default function Register() {
                         </FormControl>
                         <FormLabel className="cursor-pointer">Customer</FormLabel>
                       </FormItem>
-                      <FormItem className="flex items-center space-x-2">
+                     {/*<FormItem className="flex items-center space-x-2">
                         <FormControl>
                           <RadioGroupItem value="barber" />
                         </FormControl>
@@ -266,7 +349,7 @@ export default function Register() {
                           <RadioGroupItem value="admin" />
                         </FormControl>
                         <FormLabel className="cursor-pointer">Admin</FormLabel>
-                      </FormItem>
+                      </FormItem> */}
                     </RadioGroup>
                   </FormControl>
                   <FormMessage />
@@ -295,5 +378,4 @@ export default function Register() {
       </div>
     </Layout>
   );
- }
-
+}

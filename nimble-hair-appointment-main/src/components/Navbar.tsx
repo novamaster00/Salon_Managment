@@ -95,6 +95,8 @@ export default function Navbar() {
           background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
           border: 1px solid #e2e8f0;
           box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+          min-width: 280px;
+          max-width: 320px;
         }
 
         .profile-dropdown-item {
@@ -104,6 +106,20 @@ export default function Navbar() {
         .profile-dropdown-item:hover {
           background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
           transform: translateX(2px);
+        }
+
+        .profile-email {
+          word-break: break-all;
+          overflow-wrap: break-word;
+          max-width: 180px;
+          line-height: 1.3;
+        }
+
+        .profile-name {
+          word-break: break-word;
+          overflow-wrap: break-word;
+          max-width: 180px;
+          line-height: 1.2;
         }
       `}</style>
 
@@ -189,8 +205,8 @@ export default function Navbar() {
                           {getInitials(user?.name || user?.email)}
                         </AvatarFallback>
                       </Avatar>
-                      <div className="flex flex-col items-start">
-                        <span className="text-sm font-medium text-barbershop-navy">
+                      <div className="flex flex-col items-start max-w-32">
+                        <span className="text-sm font-medium text-barbershop-navy truncate max-w-full">
                           {user?.name || 'User'}
                         </span>
                         <span className="text-xs text-gray-500 capitalize">
@@ -203,18 +219,18 @@ export default function Navbar() {
                     </button>
                     
                     {isProfileDropdownOpen && (
-                      <div className="absolute right-0 mt-2 w-64 profile-dropdown rounded-lg py-2 z-20">
+                      <div className="absolute right-0 mt-2 profile-dropdown rounded-lg py-2 z-20">
                         {/* Profile Header */}
                         <div className="px-4 py-3 border-b border-gray-100">
-                          <div className="flex items-center space-x-3">
-                            <Avatar className="h-12 w-12">
+                          <div className="flex items-start space-x-3">
+                            <Avatar className="h-12 w-12 flex-shrink-0">
                               <AvatarFallback className="bg-gradient-to-br from-barbershop-navy to-barbershop-gold text-white font-semibold">
                                 {getInitials(user?.name || user?.email)}
                               </AvatarFallback>
                             </Avatar>
-                            <div>
-                              <p className="font-semibold text-gray-900">{user?.name || 'User'}</p>
-                              <p className="text-sm text-gray-500">{user?.email}</p>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-semibold text-gray-900 profile-name">{user?.name || 'User'}</p>
+                              <p className="text-sm text-gray-500 profile-email">{user?.email}</p>
                               <span className="inline-block px-2 py-1 text-xs bg-barbershop-gold/10 text-barbershop-navy rounded-full capitalize mt-1">
                                 {user?.role}
                               </span>
@@ -229,8 +245,8 @@ export default function Navbar() {
                             className="profile-dropdown-item flex items-center px-4 py-3 text-sm text-gray-700"
                             onClick={() => setIsProfileDropdownOpen(false)}
                           >
-                            <User className="mr-3 h-4 w-4 text-barbershop-navy" />
-                            <div>
+                            <User className="mr-3 h-4 w-4 text-barbershop-navy flex-shrink-0" />
+                            <div className="flex-1">
                               <p className="font-medium">My Profile</p>
                               <p className="text-xs text-gray-500">View and edit profile</p>
                             </div>
@@ -241,8 +257,8 @@ export default function Navbar() {
                             className="profile-dropdown-item flex items-center px-4 py-3 text-sm text-gray-700"
                             onClick={() => setIsProfileDropdownOpen(false)}
                           >
-                            <Settings className="mr-3 h-4 w-4 text-barbershop-navy" />
-                            <div>
+                            <Settings className="mr-3 h-4 w-4 text-barbershop-navy flex-shrink-0" />
+                            <div className="flex-1">
                               <p className="font-medium">Account Settings</p>
                               <p className="text-xs text-gray-500">Manage your account</p>
                             </div>
@@ -256,8 +272,8 @@ export default function Navbar() {
                               }}
                               className="profile-dropdown-item flex items-center w-full px-4 py-3 text-sm text-red-600 hover:bg-red-50"
                             >
-                              <LogOut className="mr-3 h-4 w-4" />
-                              <div className="text-left">
+                              <LogOut className="mr-3 h-4 w-4 flex-shrink-0" />
+                              <div className="text-left flex-1">
                                 <p className="font-medium">Sign Out</p>
                                 <p className="text-xs text-red-400">Log out of your account</p>
                               </div>
@@ -319,13 +335,13 @@ export default function Navbar() {
                     {/* Mobile Profile Section */}
                     <div className="py-3 px-2 bg-gradient-to-r from-barbershop-navy/5 to-barbershop-gold/5 rounded-lg">
                       <div className="flex items-center space-x-3 mb-3">
-                        <Avatar className="h-10 w-10">
+                        <Avatar className="h-10 w-10 flex-shrink-0">
                           <AvatarFallback className="bg-gradient-to-br from-barbershop-navy to-barbershop-gold text-white font-semibold">
                             {getInitials(user?.name || user?.email)}
                           </AvatarFallback>
                         </Avatar>
-                        <div>
-                          <p className="font-semibold text-barbershop-navy">{user?.name || user?.email}</p>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-barbershop-navy truncate">{user?.name || user?.email}</p>
                           <span className="text-xs bg-barbershop-gold/20 text-barbershop-navy px-2 py-1 rounded-full capitalize">
                             {user?.role}
                           </span>
@@ -410,7 +426,6 @@ export default function Navbar() {
                   title="View developer info"
                 >
                   <p className="font-bold text-sm">⚡ DK-Salon Powered by Harsh Parmar</p>
-                  <p className="text-xs opacity-90">👆 Click to view developer info</p>
                 </button>
               </div>
             </div>
