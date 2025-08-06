@@ -338,8 +338,8 @@ function DashboardContent() {
   return (
     <Layout>
       <div className="max-w-6xl mx-auto">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-          <div>
+        <div className="flex flex-col items-center md:items-start gap-4 mb-8">
+          <div className="text-center md:text-left">
             <h1 className="text-3xl font-bold">
               {isAdmin ? 'Admin Dashboard' : 'Barber Dashboard'}
             </h1>
@@ -348,8 +348,8 @@ function DashboardContent() {
             </p>
           </div>
 
-          <div className="flex gap-4 items-center flex-wrap">
-            {/* Date selector input */}
+          <div className="w-full flex flex-col items-center gap-4 md:flex-row md:justify-end">
+            {/* Date selector */}
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4 text-gray-500" />
               <input
@@ -360,23 +360,26 @@ function DashboardContent() {
               />
             </div>
 
-            <Link to="/working-hours">
-              <Button variant="outline" className="flex items-center gap-2">
-                <Clock className="h-4 w-4" />
-                Working Hours
-              </Button>
-            </Link>
+            {/* Buttons in column for mobile, row for desktop */}
+            <div className="flex flex-col w-full md:w-auto md:flex-row gap-3 md:gap-2">
+              <Link to="/working-hours">
+                <Button variant="outline" className="w-full md:w-auto flex items-center justify-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  Working Hours
+                </Button>
+              </Link>
 
-            <Link to="/blocked-slots">
-              <Button variant="outline" className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                Blocked Slots
-              </Button>
-            </Link>
+              <Link to="/blocked-slots">
+                <Button variant="outline" className="w-full md:w-auto flex items-center justify-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  Blocked Slots
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-lg flex items-center gap-2">
@@ -431,11 +434,19 @@ function DashboardContent() {
         </div>
 
         <Tabs defaultValue="queue" className="w-full" onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="queue">Waiting ({waitingQueue.length})</TabsTrigger>
-            <TabsTrigger value="ongoing">In Progress ({ongoingQueue.length})</TabsTrigger>
-            <TabsTrigger value="completed">Completed ({completedQueue.length})</TabsTrigger>
-            <TabsTrigger value="pending">Pending Approval ({pendingAppointments.length})</TabsTrigger>
+          <TabsList className="grid grid-cols-2 sm:grid-cols-4 w-full gap-1">
+            <TabsTrigger value="queue">
+              <span className="text-xs sm:text-sm">Waiting ({waitingQueue.length})</span>
+            </TabsTrigger>
+            <TabsTrigger value="ongoing">
+              <span className="text-xs sm:text-sm">Progress ({ongoingQueue.length})</span>
+            </TabsTrigger>
+            <TabsTrigger value="completed">
+              <span className="text-xs sm:text-sm">Done ({completedQueue.length})</span>
+            </TabsTrigger>
+            <TabsTrigger value="pending">
+              <span className="text-xs sm:text-sm">Pending ({pendingAppointments.length})</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="queue">

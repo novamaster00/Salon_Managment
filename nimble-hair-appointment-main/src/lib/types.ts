@@ -12,6 +12,7 @@ export interface AuthResponse {
   token: string;
   user: User;
   success?:boolean;
+  message?: string;
 }
 
 export interface Barber {
@@ -31,6 +32,7 @@ export interface Appointment {
   endTime: string; // ISO date string
   status: AppointmentStatus;
   tokenNumber?: string;
+  message?: string;
   
 }
 
@@ -46,6 +48,7 @@ export interface WalkIn {
   endTime: string;
   status: AppointmentStatus;
   tokenNumber: string;
+  message?: string;
 }
 
 export type AppointmentStatus = 'confirmed'|'pending_approval' | 'waiting' | 'ongoing' | 'completed' | 'cancelled'|'no-show'|'approved'|'rejected';
@@ -109,6 +112,7 @@ export interface WorkingHours {
   date: string;
   startTime: string;
   endTime: string;
+  message?:string;
 }
 
 export interface WorkingHoursInput {
@@ -129,6 +133,7 @@ export interface BlockedSlot {
   startTime: string; // ISO date string
   endTime: string; // ISO date string
   date:string;
+  message?:string;
 }
 
 export interface AppointmentForm {
@@ -164,6 +169,7 @@ export interface StatusUpdateRequest {
   status: AppointmentStatus;
   appointmentId?:string;
   walkinId?:string;
+  message?: string;
 }
 
 export interface User {
@@ -181,6 +187,7 @@ export interface UserProfileResponse {
   name: string;
   phoneNumber: string;
   role: UserRole;
+  mressage?:string;
 }
 
 export interface DashboardResponse {
@@ -194,6 +201,7 @@ export interface DashboardResponse {
       pendingApprovals: number;
       inQueue: number;
       completed: number;
+      mressage?:string;
     };
     pendingAppointments: any[];
     currentService: null | any;
@@ -201,12 +209,14 @@ export interface DashboardResponse {
     completedServices: any[];
     WalkIn: any[]; // Add this line to fix the TypeScript error
     queue: QueueEntry[];
+    message?:string;
  
   }
 }
 
 export interface ForgotPasswordRequest {
   email: string;
+  message?:string;
 }
 
 export interface ForgotPasswordResponse {
@@ -218,11 +228,13 @@ export interface ResetPasswordRequest {
   token: string;
   password: string;
   confirmPassword: string;
+  message?: string;
 }
 
 export interface ResetPasswordResponse {
   success: boolean;
   message: string;
+  
 }
 
 export interface ValidateTokenResponse {

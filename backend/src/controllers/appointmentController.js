@@ -28,6 +28,14 @@ const calculateEndTime = (startTime, duration) => {
   return addMinutesToTime(startTime, duration);
 };
 
+// Helper function to validate if the requested time is in the past
+const isRequestedTimeValid = (date, requestedTime) => {
+  const now = new Date();
+  const requestedDateTime = new Date(`${date}T${requestedTime}`);
+  
+  return requestedDateTime > now;
+};
+
 // Service durations in minutes (simplified example)
 const SERVICE_DURATIONS = {
   'haircut': 30,
@@ -52,6 +60,16 @@ exports.checkAvailability = asyncHandler(async (req, res, next) => {
   const { barberId, date, requestedTime, service } = req.body;
 
   console.log("\nbarberId ", barberId, "\ndate ", date, "\nrequestedTime ", requestedTime, "\nservice ", service, "\n");
+
+  // Validate if the requested time is not in the past
+  if (!isRequestedTimeValid(date, requestedTime)) {
+    return next(
+      new ErrorResponse(
+        'Invalid request time. Cannot book appointments for past dates or times.',
+        400
+      )
+    );
+  }
 
   // Calculate estimated time based on service
   const serviceKey = service.toLowerCase().replace(/\s+/g, '-');
@@ -126,6 +144,16 @@ exports.checkAvailability = asyncHandler(async (req, res, next) => {
 exports.createAppointment = asyncHandler(async (req, res, next) => {
   // Add user ID to request body
   req.body.customerId = req.user.id;
+
+  // Validate if the requested time is not in the past
+  if (!isRequestedTimeValid(req.body.date, req.body.requestedTime)) {
+    return next(
+      new ErrorResponse(
+        'Invalid request time. Cannot book appointments for past dates or times.',
+        400
+      )
+    );
+  }
 
   // Calculate estimated time based on service
   const serviceKey = req.body.service.toLowerCase().replace(/\s+/g, '-');
@@ -239,6 +267,16 @@ exports.confirmSuggestedAppointment = asyncHandler(async (req, res, next) => {
   // Prevent changing status of finalized appointments
   if (appointment.status !== STATUS.PENDING_APPROVAL && appointment.status !== STATUS.SUGGESTED) {
     return next(new ErrorResponse('Appointment cannot be updated at this stage', 400));
+  }
+
+  // Validate if the appointment time is not in the past before confirming
+  if (!isRequestedTimeValid(appointment.date, appointment.requestedTime)) {
+    return next(
+      new ErrorResponse(
+        'Cannot confirm appointment for past dates or times.',
+        400
+      )
+    );
   }
 
   // Update requested time and status
@@ -767,5 +805,3 @@ exports.resendVerificationEmail = asyncHandler(async (req, res, next) => {
     });
   }
 });
-
-
