@@ -3,16 +3,15 @@
  * ../constants/status.js
  */
 const STATUS = {
-  PENDING_APPROVAL: 'confirmed',//NOTHING LIKE THIS EXIST 
-  PENDING_APPROVAL_BARBER:"pending",
-  CANCELLED: 'Cancelled',
-  WAITING: 'waiting',
+  PENDING_APPROVAL: 'pending-approval',
   APPROVED: 'approved',
   REJECTED: 'rejected',
   COMPLETED: 'completed',
   ONGOING: 'ongoing',
-  NOSHOW:'no-show'
+  WAITING: 'waiting',
+  CANCELLED: 'cancelled',
+  NOSHOW: 'no-show'
 };
 
-
 module.exports = STATUS;
+

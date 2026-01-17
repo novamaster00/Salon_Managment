@@ -7,11 +7,22 @@ const {
   updatePassword,
   handleLogoutUser,
   handleRefreshToken,
+  verifyEmail,
+  resendVerificationEmail,
+  getUserProfile,
+  updateUserProfile,
+  changePassword
 } = require('../controllers/authController');
-const validateRequest = require('../middleware/validator');
-const { protect } = require('../middleware/auth');
-
+const {
+  forgotPassword,
+  resetPassword,
+  validateResetToken
+} = require('../controllers/authRecoveryController');
+const {validateRequest,validateForgotPassword,validateResetPassword } = require('../middleware/validator');
+const { protect} = require('../middleware/auth');
 const router = express.Router();
+
+
 
 router.post('/register', validateRequest('auth', 'register'), register);
 router.post('/login', validateRequest('auth', 'login'), login);
@@ -20,7 +31,18 @@ router.put('/updatedetails', protect, updateDetails);
 router.put('/updatepassword', protect, updatePassword);
 router.get('/logout',handleLogoutUser);
 router.get('/refresh', handleRefreshToken);
-
+router.get('/verify-email',verifyEmail);
+router.post('/resend-verification', resendVerificationEmail);
+router.get('/refresh', handleRefreshToken);
+//forgot password
+router.post('/forgot-password', validateForgotPassword, forgotPassword);
+// POST /api/auth/reset-password - Reset password with token
+router.post('/reset-password', validateResetPassword, resetPassword);
+// GET /api/auth/validate-reset-token/:token - Validate if reset token is valid (optional)
+router.get('/validate-reset-token/:token', validateResetToken);
+router.get('/profile/:userId', protect, getUserProfile);
+router.put('/profile/:userId', protect, updateUserProfile);  
+router.put('/profile/:userId/password', protect, changePassword);
 
 
 module.exports = router;

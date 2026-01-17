@@ -11,6 +11,7 @@ export interface User {
 export interface AuthResponse {
   token: string;
   user: User;
+  success?:boolean;
 }
 
 export interface Barber {
@@ -30,6 +31,7 @@ export interface Appointment {
   endTime: string; // ISO date string
   status: AppointmentStatus;
   tokenNumber?: string;
+  
 }
 
 export interface WalkIn {
@@ -154,6 +156,7 @@ export interface AvailableSlotRequest {
   date: string; // YYYY-MM-DD
   requestedTime: string; // HH:mm
   service:string;
+  // email:string;//new add on because of reservation system. 
 }
 
 export interface StatusUpdateRequest {
@@ -196,6 +199,35 @@ export interface DashboardResponse {
     currentService: null | any;
     waitingQueue: Array<QueueEntry>;
     completedServices: any[];
+    WalkIn: any[]; // Add this line to fix the TypeScript error
     queue: QueueEntry[];
-  };
+ 
+  }
+}
+
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface ForgotPasswordResponse {
+  success: boolean;
+  message: string;
+}
+
+export interface ResetPasswordRequest {
+  token: string;
+  password: string;
+  confirmPassword: string;
+}
+
+export interface ResetPasswordResponse {
+  success: boolean;
+  message: string;
+}
+
+export interface ValidateTokenResponse {
+  success: boolean;
+  message: string;
+  email?: string;
+  remainingMinutes?: number;
 }

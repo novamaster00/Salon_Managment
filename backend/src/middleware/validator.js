@@ -19,6 +19,31 @@ const customTime = Joi.string().custom((value, helpers) => {
 }, 'Time Format Validation');
 
 
+// Service durations for validation
+const SERVICE_DURATIONS = {
+  'haircut': 30,
+  'haircut-and-beard': 45,
+  'beard-trim': 15,
+  'haircut-and-styling': 60,
+  'coloring': 90,
+  'styling': 30,
+  'kids-haircut': 20,
+  'shave': 30,
+  'facial': 45,
+  'full-service': 90
+};
+const validateService = Joi.string()
+  .custom((value, helpers) => {
+    const serviceKey = value.toLowerCase().replace(/\s+/g, '-');
+    if (!Object.keys(SERVICE_DURATIONS).includes(serviceKey)) {
+      return helpers.message(`"${value}" is not a valid service type`);
+    }
+    return value;
+  }, 'Service Type Validation')
+  .required();
+
+// Status enums updated according to knowledge base
+const appointmentStatusEnum = Object.values(STATUS);
 
 // Create validation schemas
 const schemas = {
@@ -31,11 +56,15 @@ const schemas = {
       service: Joi.string().required(),
       date: customDate.required(),
       requestedTime: customTime.required(),
-      notes: Joi.string().allow('', null)
+      notes: Joi.string().allow('', null),
+      customerId: Joi.string().optional(), // Added
+      startTime: customTime.optional(),    // Reserved internally
+      endTime: customTime.optional()       // Reserved internally
     }),
     update: Joi.object({
+      _id: Joi.string().allow('', null),
       appointmentId: Joi.string().required(),
-      status: Joi.string().valid('pending_approval', 'approved', 'rejected', 'completed', 'waiting','pending','ongoing').required(),
+      status: Joi.string().valid(...appointmentStatusEnum).required(),
       notes: Joi.string().allow('', null)
     })
   },
@@ -92,7 +121,9 @@ const schemas = {
   availableSlots: {
     search: Joi.object({
       barberId: Joi.string().required(),
-      date: customDate.required()
+      date: customDate.required(),
+      service: Joi.string().required(),
+      requestedTime: customTime.required(),
     })
   },
   auth: {
@@ -136,4 +167,55 @@ const validateRequest = (schemaName, validationType) => {
   };
 };
 
-module.exports = validateRequest;
+const passwordResetSchemas = {
+  forgotPassword: Joi.object({
+    email: Joi.string().email().required().messages({
+      'string.email': 'Please provide a valid email address',
+      'any.required': 'Email is required'
+    })
+  }),
+  
+  resetPassword: Joi.object({
+    token: Joi.string().required().messages({
+      'any.required': 'Reset token is required'
+    }),
+    password: Joi.string().min(6).required().messages({
+      'string.min': 'Password must be at least 6 characters long',
+      'any.required': 'Password is required'
+    }),
+    confirmPassword: Joi.string().valid(Joi.ref('password')).required().messages({
+      'any.only': 'Passwords do not match',
+      'any.required': 'Confirm password is required'
+    })
+  })
+};
+const validateForgotPassword = (req, res, next) => {
+  const { error } = passwordResetSchemas.forgotPassword.validate(req.body);
+  
+  if (error) {
+    const errorMessage = error.details.map(detail => detail.message).join(', ');
+    return res.status(400).json({
+      success: false,
+      message: errorMessage
+    });
+  }
+  next();
+};
+
+const validateResetPassword = (req, res, next) => {
+  const { error } = passwordResetSchemas.resetPassword.validate(req.body);
+  
+  if (error) {
+    const errorMessage = error.details.map(detail => detail.message).join(', ');
+    return res.status(400).json({
+      success: false,
+      message: errorMessage
+    });
+  }
+  next();
+};
+
+module.exports = {validateRequest,
+                  passwordResetSchemas,
+                  validateForgotPassword,
+                  validateResetPassword};

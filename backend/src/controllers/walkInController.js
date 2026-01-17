@@ -4,6 +4,7 @@ const WalkIn = require('../models/WalkIn');
 const WaitingQueue = require('../models/WaitingQueue');
 const User = require('../models/User');
 const STATUS = require('../constants/status');
+const AtomicReservationService = require('../services/atomicReservationService');
 const { addMinutesToTime } = require('../utils/dateUtils');
 const { 
   sendWalkInNotification,
@@ -15,6 +16,10 @@ const {
 const { 
   addWalkInToQueue 
 } = require('../services/queueManagerService');
+
+const calculateEndTime = (startTime, duration) => {
+  return addMinutesToTime(startTime, duration);
+};
 
 // Service durations in minutes (simplified example)
 const SERVICE_DURATIONS = {
@@ -69,18 +74,67 @@ exports.createWalkIn = asyncHandler(async (req, res, next) => {
     );
   }
   
-  // Set start and end time
+  // Calculate end time using helper function
+const endTime = calculateEndTime(nextSlot.start, estimatedTime);
+
+// Generate unique ID for walk-in reservation
+const walkInId = `walkin_${Date.now()}`;
+
+// Atomically reserve the slot
+const reservation = await AtomicReservationService.reserveTimeSlot(
+  req.body.barberId,
+  req.body.date,
+  nextSlot.start,
+  endTime,
+  'walkin',
+  walkInId
+);
+
+if (!reservation.success) {
+  return res.status(400).json({
+    success: false,
+    message: 'Slot became unavailable. Please try again.'
+  });
+}
+
+// Validate that the reservation is valid
+const hasValidReservation = await AtomicReservationService.validateReservation(
+  req.body.barberId,
+  req.body.date,
+  nextSlot.start,
+  walkInId
+);
+
+if (!hasValidReservation) {
+  return res.status(400).json({
+    success: false,
+    message: 'Failed to validate reservation. Slot may have been taken.'
+  });
+}
+
+  // Set calculated end time
   req.body.startTime = nextSlot.start;
-  req.body.endTime = nextSlot.end;
+  req.body.endTime = endTime;
   
   // Set initial status
   req.body.status = STATUS.WAITING;
   
   // Create walk-in - FIX: Use a different variable name here to avoid conflict
   const newWalkIn = await WalkIn.create(req.body);
-  
+
+  //can create ambiguty
+  req.body.walkInId = walkInId; 
+
   // Add to waiting WalkIn
   await addWalkInToQueue(newWalkIn._id);
+
+  // Remove reservation now that we've persisted the walk-in
+  await AtomicReservationService.removeReservation(
+    req.body.barberId,
+    req.body.date,
+    nextSlot.start,
+    walkInId
+  )
   
   // Send notifications
   await sendWalkInNotification(newWalkIn);

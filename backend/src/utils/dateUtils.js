@@ -107,10 +107,11 @@ const getMinutesBetweenTimes = (startTime, endTime) => {
   return endTotalMinutes - startTotalMinutes;
 };
 
+
 module.exports = {
   isValid24HourTime,
   isValidDateFormat,
   compareTimeStrings,
   addMinutesToTime,
-  getMinutesBetweenTimes
+  getMinutesBetweenTimes,
 };

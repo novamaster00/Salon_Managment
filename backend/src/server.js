@@ -1,5 +1,5 @@
-require('dotenv').config();
-
+// require('dotenv').config();
+require('dotenv').config({ path: __dirname + '/.env' });
 // require('dotenv').config()
 const express = require('express');
 const cors = require('cors');
@@ -30,6 +30,8 @@ const waitingQueueRoutes = require('./routes/waitingQueue');
 const availableSlotsRoutes = require('./routes/availableSlots');
 const dashboardRoutes = require('./routes/dashboard');
 
+
+
 const app = express();
 
 
@@ -39,12 +41,20 @@ app.use(cors(corsConfig))
 app.options('*', cors(corsConfig)); // handles preflight
 
 app.use((req, res, next) => {
-  console.log('CORS response headers:');
-  console.log('Access-Control-Allow-Origin:', res.getHeader('Access-Control-Allow-Origin'));
-  console.log('Access-Control-Allow-Credentials:', res.getHeader('Access-Control-Allow-Credentials'));
   next();
 });
 
+const log = console.log;
+console.log = function (...args) {
+  if (
+    args.length > 0 &&
+    typeof args[0] === 'string' &&
+    args[0].includes('Decoded User from JWT')
+  ) {
+    return; // suppress that specific log
+  }
+  log.apply(console, args);
+};
 
 // Body parser
 app.use(express.json());
@@ -55,7 +65,6 @@ app.use(helmet());
 
 
 app.use((req, res, next) => {
-  console.log('Incoming request from:', req.headers.origin);
   next();
 });
 
@@ -68,8 +77,8 @@ app.use('/api/walkins', walkInRoutes);
 app.use('/api/working-hours', workingHoursRoutes);
 app.use('/api/blocked-slots', blockedSlotRoutes);
 app.use('/api/waiting-queue', waitingQueueRoutes);
-// app.use('/api/available-slots', availableSlotsRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+
 
 // Root endpoint
 app.get('/', (req, res) => {

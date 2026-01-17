@@ -4,6 +4,7 @@ const WaitingQueue = require('../models/WaitingQueue');
 const WorkingHours = require('../models/WorkingHours');
 const WalkIn = require('../models/WalkIn');
 const STATUS = require('../constants/status');
+const AtomicReservationService = require('./atomicReservationService');
 const { 
   compareTimeStrings, 
   addMinutesToTime,
@@ -52,14 +53,13 @@ const findAvailableTimeDurations = async (barberId, date) => {
     status: { $in: [STATUS.WAITING, STATUS.APPROVED, STATUS.ONGOING] }
   }).select('startTime endTime');
 
-  // Combine all unavailable time slots
+  // Sort busy slots by start time
   const busySlots = [
     ...appointments.map(a => ({ start: a.startTime, end: a.endTime })),
     ...blockedSlots.map(b => ({ start: b.startTime, end: b.endTime })),
     ...walkIns.map(w => ({ start: w.startTime, end: w.endTime }))
   ].filter(slot => slot.start && slot.end); // Filter out any incomplete slots
 
-  // Sort busy slots by start time
   busySlots.sort((a, b) => compareTimeStrings(a.start, b.start));
 
   // Find free intervals
@@ -105,7 +105,16 @@ const findAvailableTimeDurations = async (barberId, date) => {
     return compareTimeStrings(slot.start, slot.end) < 0;
   });
 
-  return bufferedFreeSlots;
+  // Check for reserved slots using the atomic reservation service
+  const finalAvailableSlots = [];
+  for (const slot of bufferedFreeSlots) {
+    const reserved = await AtomicReservationService.isSlotReserved(barberId, date, slot.start);
+    if (!reserved) {
+      finalAvailableSlots.push(slot);
+    }
+  }
+
+  return finalAvailableSlots;
 };
 
 /**
@@ -159,18 +168,22 @@ const findNextAvailableSlot = async (barberId, date, requestedTime, duration) =>
     };
   }
   
-  // If no viable slot found at the requested time, find the next available
+  /// If no viable slot found at the requested time, find the next available
   for (const slot of availableSlots) {
     if (compareTimeStrings(slot.start, requestedTime) > 0) {
       // This slot starts after the requested time
       const slotDuration = getMinutesBetweenTimes(slot.start, slot.end);
       
       if (slotDuration >= duration) {
-        // This slot is long enough for the service
-        return {
-          start: slot.start,
-          end: addMinutesToTime(slot.start, duration)
-        };
+        // Check if this slot is reserved
+        const isReserved = await AtomicReservationService.isSlotReserved(barberId, date, slot.start);
+        if (!isReserved) {
+          // This slot is long enough for the service and not reserved
+          return {
+            start: slot.start,
+            end: addMinutesToTime(slot.start, duration)
+          };
+        }
       }
     }
   }

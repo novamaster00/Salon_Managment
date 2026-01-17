@@ -1,6 +1,10 @@
 const WorkingHours = require('../models/WorkingHours');
+const AtomicReservationService = require('../services/atomicReservationService');
 const { compareTimeStrings, addMinutesToTime } = require('../utils/dateUtils');
 const { isTimeSlotAvailable } = require('../services/findAvailableTimeSlot');
+const calculateEndTime = (startTime, duration) => {
+  return addMinutesToTime(startTime, duration);
+};
 
 // Service durations in minutes
 const SERVICE_DURATIONS = {
@@ -88,7 +92,7 @@ const checkSlotAvailability = async (req, res) => {
 
     // Calculate parameters for isTimeSlotAvailable function
     const startTime = requestedTime;
-    
+    const serviceKey = service.toLowerCase().replace(/\s+/g, '-');
     // Get service duration and calculate end time
     const serviceDuration = SERVICE_DURATIONS[service];
     const endTime = addMinutesToTime(startTime, serviceDuration);
@@ -104,22 +108,43 @@ const checkSlotAvailability = async (req, res) => {
     // Use the existing isTimeSlotAvailable function to check availability
     const isAvailable = await isTimeSlotAvailable(barberId, date, startTime, endTime);
     
-    if (isAvailable) {
-      return res.status(200).json({
-        available: true,
-        message: 'The requested time is available',
-        slot: {
-          start: startTime,
-          end: endTime,
-          duration: serviceDuration
-        }
-      });
-    } else {
-      return res.status(200).json({
-        available: false,
-        message: 'The requested time slot is not available'
-      });
-    }
+    if (!isAvailable) {
+  return res.status(200).json({
+    available: false,
+    message: 'The requested time slot is already taken'
+  });
+}
+
+// Atomically reserve the slot
+const reservation = await AtomicReservationService.reserveTimeSlot(
+  barberId,
+  date,
+  startTime,
+  endTime,
+  'appointment', // reservation type (uppercase)
+  req.user.email
+);
+
+if (!reservation.success) {
+  return res.status(200).json({
+    available: false,
+    message: reservation.message || 'Failed to reserve the time slot'
+  });
+}
+
+// Return success response with confirmed slot
+return res.status(200).json({
+  available: true,
+  message: 'Time slot is available and reserved',
+  slot: {
+    start: startTime,
+    end: endTime,
+    duration: serviceDuration,
+    date,
+    barberId,
+    service
+  }
+});
   } catch (error) {
     console.error('Error checking slot availability:', error);
     return res.status(500).json({ 

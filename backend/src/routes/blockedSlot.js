@@ -7,7 +7,7 @@ const {
   deleteBlockedSlot,
   createBlockedSlotWithReplacement
 } = require('../controllers/blockedSlotController');
-const validateRequest = require('../middleware/validator');
+const {validateRequest} = require('../middleware/validator');
 const { protect, authorize } = require('../middleware/auth');
 
 const router = express.Router();

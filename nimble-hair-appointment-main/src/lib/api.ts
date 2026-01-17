@@ -1,4 +1,5 @@
 
+import { Phone } from 'lucide-react';
 import { 
   AuthResponse, 
   Appointment, 
@@ -12,10 +13,15 @@ import {
   User,
   DashboardResponse ,
   AppointmentStatus,
-  WorkingHoursInput
+  WorkingHoursInput,
+  ForgotPasswordResponse,
+  ResetPasswordRequest,
+  ResetPasswordResponse,
+  ValidateTokenResponse
 } from './types';
 
-const API_URL = import.meta.env.VITE_BACKEND_URL; // Replace with actual API URL
+const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000/api';
+console.log("API_URL",import.meta.env.VITE_BACKEND_URL);
 
 // Helper function to handle API responses
 export async function handleResponse<T>(response: Response): Promise<T> {
@@ -93,6 +99,7 @@ export async function login(email: string, password: string): Promise<AuthRespon
       headers: {
         'Content-Type': 'application/json',
       },
+      credentials: 'include',
       body: JSON.stringify({ email, password }),
     });
     
@@ -101,6 +108,12 @@ export async function login(email: string, password: string): Promise<AuthRespon
     if (!response.ok) {
       // Try to get error message from response
       const errorData = await response.json().catch(() => null);
+
+      // Handle specific verification error
+      if (errorData?.needsVerification) {
+        throw new Error('Please verify your email before logging in. Check your inbox for the verification link.');
+      }
+
       throw new Error(errorData?.message || `API Error: ${response.status}`);
     }
     
@@ -119,17 +132,217 @@ export async function login(email: string, password: string): Promise<AuthRespon
   }
 }
 
-export async function register(email: string, password: string, role: string, name?: string): Promise<AuthResponse> {
-  const response = await fetch(`${API_URL}/auth/register`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ email, password, role, name }),
-  });
-  return handleResponse<AuthResponse>(response);
+export async function register(
+  email: string, 
+  password: string, 
+  role: string, 
+  name?: string, 
+  phone?: string
+): Promise<AuthResponse> {
+  try {
+    const requestBody = { email, password, role, name, phoneNumber:phone };
+    console.log('Registration request:', requestBody);
+    
+    const response = await fetch(`${API_URL}/auth/register`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    let responseData;
+    try {
+      responseData = await response.json();
+    } catch (parseError) {
+      console.error('Failed to parse response JSON:', parseError);
+      throw new Error(`Server returned invalid JSON. Status: ${response.status}`);
+    }
+
+    console.log('Server response:', {
+      status: response.status,
+      statusText: response.statusText,
+      data: responseData
+    });
+    
+    // Log the complete response data for debugging
+    console.log('Complete response data:', JSON.stringify(responseData, null, 2));
+
+    if (!response.ok) {
+      // More detailed error based on status code
+      let errorMessage = responseData?.message || 'Registration failed';
+      
+      switch (response.status) {
+        case 400:
+          errorMessage = responseData?.message || 'Invalid registration data';
+          break;
+        case 409:
+          errorMessage = 'User with this email already exists';
+          break;
+        case 500:
+          errorMessage = 'Server error during registration';
+          break;
+        default:
+          errorMessage = `Registration failed (${response.status}): ${errorMessage}`;
+      }
+      
+      throw new Error(errorMessage);
+    }
+    
+    if (!responseData.success) {
+      throw new Error(responseData.message || 'Registration failed');
+    }
+    
+    return responseData;
+    
+  } catch (error) {
+    console.error('Registration API error:', error);
+    throw error;
+  }
 }
 
+
+export async function verifyEmail(token: string): Promise<AuthResponse> {
+  try {
+    console.log('🔍 Verifying email with token:', token);
+    
+    // Encode the token properly for URL
+    const encodedToken = encodeURIComponent(token);
+    
+    const response = await fetch(`${API_URL}/auth/verify-email?token=${encodedToken}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include', // Important for CORS
+    });
+
+    const responseData = await response.json();
+    
+    console.log('Verification response:', {
+      status: response.status,
+      data: responseData
+    });
+
+    if (!response.ok) {
+      throw new Error(responseData.message || 'Email verification failed');
+    }
+
+    return responseData;
+    
+  } catch (error) {
+    console.error('Email verification error:', error);
+    throw error;
+  }
+}
+
+
+// Add function to resend verification email
+export async function resendVerificationEmail(email: string): Promise<any> {
+  try {
+    const response = await fetch(`${API_URL}/auth/resend-verification`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email }),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => null);
+      throw new Error(errorData?.message || `Failed to resend verification email`);
+    }
+    
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Resend verification API error:', error);
+    throw error;
+  }
+}
+
+
+export const forgotPassword = async (email: string): Promise<ForgotPasswordResponse> => {
+  try {
+    console.log('🔄 Sending forgot password request for:', email);
+    
+    const response = await fetch(`${API_URL}/auth/forgot-password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email }),
+    });
+
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to send reset email');
+    }
+
+    console.log('✅ Forgot password request successful');
+    return data;
+    
+  } catch (error) {
+    console.error('❌ Forgot password request failed:', error);
+    throw new Error(error instanceof Error ? error.message : 'Failed to send reset email');
+  }
+};
+
+// Reset Password API function
+export const resetPassword = async (resetData: ResetPasswordRequest): Promise<ResetPasswordResponse> => {
+  try {
+    console.log('🔄 Sending reset password request');
+    
+    const response = await fetch(`${API_URL}/auth/reset-password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(resetData),
+    });
+
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to reset password');
+    }
+
+    console.log('✅ Password reset successful');
+    return data;
+    
+  } catch (error) {
+    console.error('❌ Reset password request failed:', error);
+    throw new Error(error instanceof Error ? error.message : 'Failed to reset password');
+  }
+};
+
+// Validate Reset Token API function (optional)
+export const validateResetToken = async (token: string): Promise<ValidateTokenResponse> => {
+  try {
+    console.log('🔄 Validating reset token');
+    
+    const response = await fetch(`${API_URL}/auth/validate-reset-token/${token}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.message || 'Invalid reset token');
+    }
+
+    console.log('✅ Reset token is valid');
+    return data;
+    
+  } catch (error) {
+    console.error('❌ Token validation failed:', error);
+    throw new Error(error instanceof Error ? error.message : 'Invalid reset token');
+  }
+};
 
 
 export async function getWaitingQueue(barberId: string, date: string): Promise<QueueEntry[]> {
@@ -181,6 +394,20 @@ export async function createAppointment(data: any): Promise<Appointment> {
   return handleResponse<Appointment>(response);
 }
 
+
+// Walk-in API calls
+export async function createWalkIn(data: any): Promise<WalkIn> {
+  const response = await fetch(`${API_URL}/walkins`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('token')}`,
+    },
+    body: JSON.stringify(data),
+  });
+  return handleResponse<WalkIn>(response);
+}
+
 //current status of working 
 export async function updateAppointmentStatus(data: StatusUpdateRequest): Promise<any> {
   const response = await fetch(`${API_URL}/appointments/status`, {
@@ -196,19 +423,6 @@ export async function updateAppointmentStatus(data: StatusUpdateRequest): Promis
     }),
   });
   return handleResponse(response);
-}
-
-// Walk-in API calls
-export async function createWalkIn(data: any): Promise<WalkIn> {
-  const response = await fetch(`${API_URL}/walkins`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${localStorage.getItem('token')}`,
-    },
-    body: JSON.stringify(data),
-  });
-  return handleResponse<WalkIn>(response);
 }
 
 //current status of working 
@@ -229,28 +443,6 @@ export async function updateWalkInStatus(data: StatusUpdateRequest): Promise<any
     },
     body: JSON.stringify(requestBody),
   });
-  return handleResponse(response);
-}
-
-export async function rejectAppointment(id: string, reason?: string): Promise<void> {
-  const token = localStorage.getItem('token');
-  
-  if (!token) {
-    throw new Error('Authentication required');
-  }
-  
-  const response = await fetch(`${API_URL}/appointments/reject`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({
-      appointmentId: id,
-      reason: reason || 'Appointment rejected by barber',
-    }),
-  });
-  
   return handleResponse(response);
 }
 
@@ -290,14 +482,21 @@ export async function getDashboard(barberId?: string, date?: string): Promise<Da
     console.error("Error fetching dashboard:", error);
     throw error;
   }
-}
+};
 
-// Approve appointment (new function needed based on controller)
-export const approveAppointment = async (appointmentId: string): Promise<void> => {
+//Approve appointment 
+export const approveAppointment = async (appointmentId: string, queueId?: string): Promise<void> => {
   const token = localStorage.getItem('token');
   
   if (!token) {
     throw new Error('Authentication required');
+  }
+  
+  const requestBody: any = {};
+  
+  // Add queue ID if provided (based on your controller expecting _id)
+  if (queueId) {
+    requestBody._id = queueId;
   }
   
   const response = await fetch(`${API_URL}/appointments/${appointmentId}/approve`, {
@@ -305,12 +504,45 @@ export const approveAppointment = async (appointmentId: string): Promise<void> =
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
-    }
+    },
+    body: JSON.stringify(requestBody)
   });
   
   await handleResponse(response);
 };
 
+
+//reject appointment
+export const rejectAppointment = async (appointmentId: string, queueId?: string, reason?: string): Promise<void> => {
+  const token = localStorage.getItem('token');
+  
+  if (!token) {
+    throw new Error('Authentication required');
+  }
+  
+  const requestBody: any = {};
+  
+  // Add queue ID if provided (based on your controller expecting _id)
+  if (queueId) {
+    requestBody._id = queueId;
+  }
+  
+  // Add reason if provided
+  if (reason) {
+    requestBody.reason = reason;
+  }
+  
+  const response = await fetch(`${API_URL}/appointments/${appointmentId}/reject`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(requestBody)
+  });
+  
+  return handleResponse(response);
+};
 
 
 // Get working hours with filters (admin can see all, barber sees only their own)
@@ -482,12 +714,12 @@ export async function deleteBlockedSlot(id: string): Promise<void> {
   return handleResponse<void>(response);
 }
 
-
-
 // User profile API calls
 export async function getUserDetails(userId: string): Promise<User> {
-  const response = await fetch(`${API_URL}/users/${userId}`, {
+  const response = await fetch(`${API_URL}/auth/profile/${userId}`, {
+    method: 'GET',
     headers: {
+      'Content-Type': 'application/json',
       'Authorization': `Bearer ${localStorage.getItem('token')}`,
     },
   });
@@ -495,7 +727,7 @@ export async function getUserDetails(userId: string): Promise<User> {
 }
 
 export async function updateUserProfile(userId: string, data: any): Promise<User> {
-  const response = await fetch(`${API_URL}/users/${userId}`, {
+  const response = await fetch(`${API_URL}/auth/profile/${userId}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -511,7 +743,7 @@ export async function changeUserPassword(
   currentPassword: string, 
   newPassword: string
 ): Promise<void> {
-  const response = await fetch(`${API_URL}/users/${userId}/password`, {
+  const response = await fetch(`${API_URL}/auth/profile/${userId}/password`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',

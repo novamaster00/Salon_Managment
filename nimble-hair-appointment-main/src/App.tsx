@@ -17,6 +17,10 @@ import Dashboard from "./pages/Dashboard";
 import WorkingHours from "./pages/WorkingHours";
 import BlockedSlots from "./pages/BlockedSlots";
 import NotFound from "./pages/NotFound";
+import VerifyEmail from "./pages/VerifyEmail";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
+import ProfilePage from "./pages/ProfilePage";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +41,10 @@ const App = () => (
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/working-hours" element={<WorkingHours />} />
             <Route path="/blocked-slots" element={<BlockedSlots />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword/>}/>
+            <Route path="/profile" element={<ProfilePage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
